@@ -5,13 +5,17 @@
     "require": {
         "php": "^7.1",
         "sensio/framework-extra-bundle": "^5.0",
+        "symfony/asset": "^4.0@beta",
         "symfony/console": "^4.0@beta",
         "symfony/flex": "^1.0",
         "symfony/framework-bundle": "^4.0",
         "symfony/lts": "^4@dev",
         "symfony/orm-pack": "^1.0",
+        "symfony/twig-bundle": "^4.0@beta",
         "symfony/web-profiler-bundle": "^4.0@beta",
-        "symfony/yaml": "^4.0"
+        "symfony/yaml": "^4.0",
+        "twig/extensions": "^1.5",
+        "twig/twig": "^2.4"
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^2.4",
