@@ -7,7 +7,8 @@
 /.idea
 imperius
 /symfony.lock
-.DS_STORE
+/.DS_STORE
+/imperius
 
 ###< symfony/framework-bundle ###
 

@@ -3,14 +3,15 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Routing\Annotation\Route;
 
 class DefaultController extends Controller
 {
     /**
-     * @\Symfony\Component\Routing\Annotation\Route("/")
+     * @Route("/")
      */
     public function indexAction()
     {
-        return $this->render('base.html.twig');
+        return $this->render('index.html.twig');
     }
 }

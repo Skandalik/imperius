@@ -1,29 +1,23 @@
 {
     "type": "project",
     "license": "proprietary",
-    "minimum-stability": "beta",
     "require": {
         "php": "^7.1",
-        "sensio/framework-extra-bundle": "^5.0",
-        "symfony/asset": "^4.0@beta",
-        "symfony/console": "^4.0@beta",
-        "symfony/flex": "^1.0",
-        "symfony/framework-bundle": "^4.0",
-        "symfony/lts": "^4@dev",
-        "symfony/orm-pack": "^1.0",
-        "symfony/twig-bundle": "^4.0@beta",
-        "symfony/web-profiler-bundle": "^4.0@beta",
-        "symfony/yaml": "^4.0",
-        "twig/extensions": "^1.5",
-        "twig/twig": "^2.4"
+        "symfony/asset": "^3.3",
+        "symfony/console": "^3.3",
+        "symfony/form": "^3.3",
+        "symfony/framework-bundle": "^3.3",
+        "symfony/profiler-pack": "^1.0",
+        "symfony/security-bundle": "^3.3",
+        "symfony/translation": "^3.3",
+        "symfony/twig-bundle": "^3.3",
+        "symfony/validator": "^3.3",
+        "symfony/yaml": "^3.3",
+        "twig/extensions": "^1.5"
     },
     "require-dev": {
-        "doctrine/doctrine-fixtures-bundle": "^2.4",
-        "symfony/debug-bundle": "^4.0@beta",
-        "symfony/dotenv": "^4.0",
-        "symfony/phpunit-bridge": "^4.0@beta",
-        "symfony/profiler-pack": "^1.0",
-        "symfony/web-server-bundle": "^4.0@beta"
+        "symfony/flex": "^1.0",
+        "symfony/dotenv": "^3.3"
     },
     "config": {
         "preferred-install": {
@@ -54,12 +48,14 @@
         ]
     },
     "conflict": {
-        "symfony/symfony": "*"
+        "symfony/symfony": "*",
+        "symfony/twig-bundle": "<3.3",
+        "symfony/debug": "<3.3"
     },
     "extra": {
         "symfony": {
-            "id": "01BXVY69Q7NC4BN2205V856M01",
-            "allow-contrib": true
+            "id": "01BYBMBCVA6GR44P5GD83YAE9C",
+            "allow-contrib": "true"
         }
     }
 }
