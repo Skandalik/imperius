@@ -11,18 +11,12 @@ services:
     web:
         container_name: web.imperius.home
         build: ./docker/nginx
-        restart: always
         networks:
             - imperius
         ports:
-            - 8888:8888
-            - 8081:80
+            - 8090:80
         volumes_from:
             - code
-        depends_on:
-          - grafana
-          - influxdb
-          - php-fpm
 
     php-fpm:
         container_name: php-fpm.imperius.home
@@ -31,6 +25,9 @@ services:
             - imperius
         volumes_from:
             - code
+        expose:
+          - 9000
+          - 9001
 
     mysql:
         container_name: mysql.imperius.home
@@ -40,49 +37,18 @@ services:
         volumes:
             - ../imperius-mysql:/var/lib/mysql
         ports:
-            - 3306:3306
+            - 13333:3306
         environment:
             - MYSQL_DATABASE=imperius
             - MYSQL_USER=imperius-project
             - MYSQL_PASSWORD=imperius-project-pass
             - MYSQL_ROOT_PASSWORD=root
 
-    redis:
-        container_name: redis.imperius.home
-        build: ./docker/redis
-        networks:
-            - imperius
-        ports:
-          - "6378:6379"
-
-    influxdb:
-        container_name: influxdb.imperius.home
-        build: ./docker/influxdb
-        networks:
-            - imperius
-        ports:
-            - 8086:8086
-            - 8083:8083
-
-    grafana:
-        container_name: grafana.imperius.home
-        build: ./docker/grafana
-        depends_on:
-            - mysql
-        restart: always
-        networks:
-            - imperius
-        ports:
-            - 3000:3000
-
-    telegraf:
-        container_name: telegraf.imperius.home
-        build: ./docker/telegraf
-        depends_on:
-            - grafana
-        restart: always
-        networks:
-            - imperius
+volumes:
+    imperius:
+        external: true
+    imperius-mysql:
+        external: true
 
 networks:
     imperius:

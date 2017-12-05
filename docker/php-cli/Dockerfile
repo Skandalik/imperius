@@ -29,7 +29,6 @@ RUN apk --update add \
         tar \
         git \
         zip \
-        php7-xdebug \
         php7-redis \
         php7-pcntl \
         php7-sockets \
@@ -37,9 +36,19 @@ RUN apk --update add \
         php7-pdo_mysql \
         php7-gmp \
         php7-imagick \
+        php7-xdebug \
         php7-simplexml \
         php7-tokenizer \
-        php7-xmlwriter
+        php7-xmlwriter \
+        php7-pear \
+        php7-dev \
+        gcc \
+        g++ \
+        make \
+        mosquitto-dev
+
+RUN pecl install Mosquitto-alpha \
+    && echo "extension=mosquitto.so" > /etc/php7/php.ini
 
 # Memory Limit
 RUN echo "memory_limit=-1" > /etc/php7/conf.d/memory-limit.ini

@@ -16,7 +16,9 @@ RUN apt-get update -qq && \
         g++ \
         make \
         musl-dev \
+        libmosquitto-dev \
         libmagickwand-dev --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
 RUN pecl install imagick && docker-php-ext-enable imagick
 
 RUN pecl install apcu \
@@ -26,6 +28,8 @@ RUN pecl install apcu \
 
 RUN docker-php-ext-configure opcache --enable-opcache
 
+RUN pecl install Mosquitto-alpha \
+    && docker-php-ext-enable mosquitto
 
 RUN docker-php-ext-install \
     sockets \
@@ -40,14 +44,14 @@ RUN pecl install -o -f redis \
 
 # Xdebug
 # here is the installation
-#RUN pecl install xdebug \
-#    && docker-php-ext-enable xdebug
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
 # here I'm copying the config file we will discuss in the next section
-#COPY ./etc/xdebug.ini /usr/local/etc/php/conf.d/
+COPY ./etc/xdebug.ini /usr/local/etc/php/conf.d/
 
 # ensure 'web' user exists
-#RUN set -x \
-#	&& adduser web --uid 1000 --disabled-password --gecos ""
+RUN set -x \
+	&& adduser web --uid 1000 --disabled-password --gecos ""
 
 COPY ./scripts/entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh

@@ -8,38 +8,13 @@ services:
         volumes_from:
             - code
 
-    redis-cli:
-        container_name: redis-cli.imperius.home
-        build: ./docker/redis
-        entrypoint:
-            - "redis-cli"
-            - "-h"
-            - "redis"
-        networks:
-            - imperius
-        depends_on:
-            - redis
-
     composer:
         container_name: composer.imperius.home
         build: docker/php-cli
-        command: composer config -g github-oauth.github.com $GITHUB_TOKEN
         entrypoint: composer
-        environment:
-            - GITHUB_TOKEN
         networks:
             - imperius
         volumes_from:
             - code
         depends_on:
             - code
-
-volumes:
-    imperius:
-        external: true
-    imperius-mysql:
-        external: true
-
-networks:
-    imperius:
-        external: true

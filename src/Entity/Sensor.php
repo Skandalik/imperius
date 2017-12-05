@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\SensorRepository")
+ * @ORM\HasLifecycleCallbacks
  * @ORM\Table(name="imp_sensor")
  */
 class Sensor
@@ -17,20 +18,20 @@ class Sensor
     /**
      * @var string
      *
-     * @ORM\Column(name="guid", type="guid", nullable=true, unique=true)
+     * @ORM\Column(name="uuid", type="guid", nullable=true, unique=true)
      */
-    private $guid;
+    private $uuid;
 
     /**
      * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom")
-     * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=true)
      */
     private $room;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="value_type", type="string", nullable=true)
+     * @ORM\Column(name="value_type", type="string", nullable=false)
      */
     private $valueType;
 
@@ -77,21 +78,47 @@ class Sensor
     private $active;
 
     /**
-     * @return string
+     * Sensor constructor.
      */
-    public function getGuid(): string
+    public function __construct()
     {
-        return $this->guid;
+        $this->uuid = $this->createUuid();
+        $this->valueType = $this->createValueType();
+        $this->sensorIp = $this->createSensorIp();
+        $this->switchable = false;
+        $this->createdAt = null;
+        $this->active = false;
     }
 
     /**
-     * @param string $guid
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function prePersist()
+    {
+        $this->setUpdatedAt(new DateTime());
+
+        if (is_null($this->getCreatedAt())) {
+            $this->setCreatedAt(new DateTime());
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getUuid(): string
+    {
+        return $this->uuid;
+    }
+
+    /**
+     * @param string $uuid
      *
      * @return Sensor
      */
-    public function setGuid(string $guid): Sensor
+    public function setUuid(string $uuid): Sensor
     {
-        $this->guid = $guid;
+        $this->uuid = $uuid;
 
         return $this;
     }
@@ -159,7 +186,7 @@ class Sensor
     /**
      * @return DateTime
      */
-    public function getCreatedAt(): DateTime
+    public function getCreatedAt()
     {
         return $this->createdAt;
     }
@@ -256,5 +283,28 @@ class Sensor
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    private function createValueType(): string
+    {
+        return "";
+    }
+
+    /**
+     * @return string
+     */
+    private function createUuid(): string
+    {
+        return "";
+    }
+
+    /**
+     * @return string
+     */
+    private function createSensorIp(): string
+    {
+        return "";
+    }
 
 }
