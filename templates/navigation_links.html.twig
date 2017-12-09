@@ -1,0 +1,19 @@
+{% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+    <li>
+        <a href="{{ path('overview') }}">Overview</a>
+    </li>
+    <li>
+        <a href="{{ path('sensor') }}">Sensor</a>
+    </li>
+    <li>
+        <a href="{{ path('room') }}">Room</a>
+    </li>
+    <li>
+        <a href="{{ path('logout') }}">Logout</a>
+    </li>
+{% else %}
+    <li>
+        <a href="{{ path('login') }}" role="button">Login</a>
+    </li>
+{% endif %}
+

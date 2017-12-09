@@ -2,7 +2,9 @@
 declare(strict_types=1);
 namespace App\Repository;
 
-class RoomRepository extends SensorRepository
+use Doctrine\ORM\EntityRepository;
+
+class RoomRepository extends EntityRepository
 {
 
 }

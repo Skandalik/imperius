@@ -9,10 +9,10 @@
 
     <title>{% block title %}Imperius Project{% endblock %}</title>
     {% block stylesheets %}{% endblock %}
-    <link rel="stylesheet" href="{{ asset('utils/css/jumbotron.bootstrap.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ asset('utils/css/style.css') }}">
 </head>
 <body>
 <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -27,14 +27,11 @@
             </button>
             <a class="navbar-brand" href="/">
                 Imperius |
-                {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                    {{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }}
-                {% endif %}
             </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse navbar-right">
             <ul class="nav navbar-nav">
-                {% block navigation_links %} {% endblock %}
+                {{ include('navigation_links.html.twig') }}
             </ul>
         </div>
         <!--/.nav-collapse -->

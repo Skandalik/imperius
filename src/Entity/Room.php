@@ -36,6 +36,15 @@ class Room
     private $floor;
 
     /**
+     * Room constructor.
+     */
+    public function __construct()
+    {
+        $this->room = $this->createRoom();
+        $this->floor = $this->createFloor();
+    }
+
+    /**
      * @return string
      */
     public function getRoom(): string
@@ -95,5 +104,20 @@ class Room
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    private function createRoom(): string
+    {
+        return "";
+    }
+
+    /**
+     * @return int
+     */
+    private function createFloor(): int
+    {
+        return 0;
+    }
 
 }
