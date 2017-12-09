@@ -4,8 +4,10 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class GenericController extends Controller
 {
@@ -18,23 +20,28 @@ class GenericController extends Controller
     /** @var  string */
     protected $route;
 
-    /**
-     * @var EntityManager
-     */
+    /** @var EntityManager */
     private $entityManager;
 
+    /**
+     * GenericController constructor.
+     *
+     * @param EntityManagerInterface $entityManager
+     */
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
         $this->route = $this->extractRoute();
     }
 
+    /**
+     * @param Request $request
+     *
+     * @return Response
+     */
     public function indexAction(Request $request)
     {
         $message = null;
-        if ($request->query->has('message')) {
-            $message = $request->query->get('message');
-        }
 
         return $this->getView(
             'index',
@@ -44,6 +51,11 @@ class GenericController extends Controller
         );
     }
 
+    /**
+     * @param Request $request
+     *
+     * @return Response
+     */
     public function addAction(Request $request)
     {
         $entity = $this->createEntity();
@@ -51,19 +63,35 @@ class GenericController extends Controller
         return $this->handleFormCreation($entity, $request, 'success', 'Success! Entity created!');
     }
 
+    /**
+     * @param Request $request
+     * @param         $id
+     *
+     * @return Response
+     */
     public function editAction(Request $request, $id)
     {
         $entity = $this->createEntity($id);
 
         return $this->handleFormCreation($entity, $request, 'success', 'Success! Entity edited!');
-
     }
 
+    /**
+     * @param Request $request
+     *
+     * @return Response
+     */
     public function showAction(Request $request)
     {
         return $this->getView('show');
     }
 
+    /**
+     * @param Request $request
+     * @param         $id
+     *
+     * @return Response
+     */
     public function deleteAction(Request $request, $id)
     {
         $entity = $this->getRepository()->find($id);
@@ -75,8 +103,20 @@ class GenericController extends Controller
         return $this->redirectToRoute('sensor');
     }
 
-    private function handleFormCreation($entity, Request $request, string $typeOfMessage, string $message)
-    {
+    /**
+     * @param         $entity
+     * @param Request $request
+     * @param string  $typeOfMessage
+     * @param string  $message
+     *
+     * @return Response
+     */
+    private function handleFormCreation(
+        $entity,
+        Request $request,
+        string $typeOfMessage,
+        string $message
+    ) {
         $form = $this->createForm($this->formType, $entity);
 
         $form->handleRequest($request);
@@ -99,7 +139,10 @@ class GenericController extends Controller
         );
     }
 
-    private function getEntities()
+    /**
+     * @return array
+     */
+    private function getEntities(): array
     {
         $repo = $this->getRepository();
 
@@ -110,14 +153,23 @@ class GenericController extends Controller
         return [];
     }
 
+    /**
+     * @param $id
+     *
+     * @return null|object
+     */
     private function createEntity($id = null)
     {
         if (!is_null($id)) {
             return $this->getRepository()->find($id);
         }
+
         return new $this->entityClass();
     }
 
+    /**
+     * @return EntityRepository|null
+     */
     private function getRepository()
     {
         if (empty($this->entityClass)) {
@@ -127,6 +179,12 @@ class GenericController extends Controller
         return $this->entityManager->getRepository($this->entityClass);
     }
 
+    /**
+     * @param string $viewName
+     * @param array  $parameters
+     *
+     * @return Response
+     */
     protected function getView(string $viewName, array $parameters = [])
     {
         $entities = $this->getEntities();
@@ -137,12 +195,20 @@ class GenericController extends Controller
         return $this->render($this->getViewTemplate($viewName), $parameters);
     }
 
-    private function getViewTemplate(string $templateFileName)
+    /**
+     * @param string $templateFileName
+     *
+     * @return string
+     */
+    private function getViewTemplate(string $templateFileName): string
     {
         return sprintf('%s\%s.html.twig', $this->getControllerTemplateDirectory(), $templateFileName);
     }
 
-    private function getControllerTemplateDirectory()
+    /**
+     * @return string
+     */
+    private function getControllerTemplateDirectory(): string
     {
         return substr(get_class($this), 4, -10);
     }
@@ -178,6 +244,7 @@ class GenericController extends Controller
         /x';
         $a = preg_split($re, $str);
         $formattedStr = implode(' ', $a);
+
         return $formattedStr;
     }
 }
