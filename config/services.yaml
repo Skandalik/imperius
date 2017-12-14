@@ -26,3 +26,26 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Util\MosquittoWrapper\Factory\MosquittoFactory:
+        arguments:
+            - '%env(MOSQUITTO_ID)%'
+    App\Util\MosquittoWrapper\Handler\MosquittoConnectionHandler:
+        arguments:
+            - '%env(MOSQUITTO_BROKER_HOST)%'
+
+    App\Util\Event\SensorFoundEvent:
+        tags:
+            - { name: kernel.event_listener, event: sensor.found }
+
+    App\Util\Event\SensorAddEvent:
+        tags:
+            - { name: kernel.event_listener, event: sensor.add }
+
+    App\Util\Event\SensorUpdateEvent:
+        tags:
+            - { name: kernel.event_listener, event: sensor.update }
+
+    App\Util\Event\SensorDeleteEvent:
+        tags:
+            - { name: kernel.event_listener, event: sensor.delete }

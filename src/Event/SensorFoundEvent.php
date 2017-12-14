@@ -1,0 +1,120 @@
+<?php
+declare(strict_types=1);
+namespace App\Event;
+
+use App\Event\Enum\SensorEventEnum;
+use Symfony\Component\EventDispatcher\Event;
+
+class SensorFoundEvent extends Event
+{
+    const NAME = SensorEventEnum::SENSOR_FOUND;
+
+    /** @var string  */
+    private $uuid;
+
+    /** @var string */
+    private $ip;
+
+    /** @var bool */
+    private $switchable;
+
+    /** @var int */
+    private $value;
+
+    /**
+     * SensorFoundEvent constructor.
+     *
+     * @param string $id
+     * @param string $ip
+     * @param bool   $switchable
+     * @param int    $value
+     */
+    public function __construct($id, $ip, $switchable, $value)
+    {
+        $this->uuid = $id;
+        $this->ip = $ip;
+        $this->switchable = $switchable;
+        $this->value = $value;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUuid(): string
+    {
+        return $this->uuid;
+    }
+
+    /**
+     * @param string $uuid
+     *
+     * @return SensorFoundEvent
+     */
+    public function setUuid(string $uuid): SensorFoundEvent
+    {
+        $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIp(): string
+    {
+        return $this->ip;
+    }
+
+    /**
+     * @param string $ip
+     *
+     * @return SensorFoundEvent
+     */
+    public function setIp(string $ip): SensorFoundEvent
+    {
+        $this->ip = $ip;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSwitchable(): bool
+    {
+        return $this->switchable;
+    }
+
+    /**
+     * @param bool $switchable
+     *
+     * @return SensorFoundEvent
+     */
+    public function setSwitchable(bool $switchable): SensorFoundEvent
+    {
+        $this->switchable = $switchable;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getValue(): int
+    {
+        return $this->value;
+    }
+
+    /**
+     * @param int $value
+     *
+     * @return SensorFoundEvent
+     */
+    public function setValue(int $value): SensorFoundEvent
+    {
+        $this->value = $value;
+
+        return $this;
+    }
+
+}

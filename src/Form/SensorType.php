@@ -18,6 +18,13 @@ class SensorType extends AbstractType
     {
         $builder
             ->add(
+                'name',
+                TextType::class,
+                [
+                    'empty_data' => 'Set name',
+                ]
+            )
+            ->add(
                 'uuid',
                 TextType::class,
                 [
@@ -33,17 +40,18 @@ class SensorType extends AbstractType
                 ]
             )
             ->add(
-                'valueType',
-                TextType::class,
-                [
-                    'empty_data' => 'Set Value Type',
-                ]
-            )
-            ->add(
                 'switchable',
                 CheckboxType::class,
                 [
                     'label'    => 'Is sensor switchable?',
+                    'required' => true,
+                ]
+            )
+            ->add(
+                'multiValue',
+                CheckboxType::class,
+                [
+                    'label'    => 'Is sensor multi value (more than 0 and 1)?',
                     'required' => true,
                 ]
             )

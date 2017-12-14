@@ -35,6 +35,9 @@
                     <td>{{ entity.sensorIp }}</td>
                     <td>{{ entity.active }}</td>
                     <td>
+                        {#{{ if entity.switchable == true }}#}
+                        <a class="btn btn-info" href="{{ path('publish_test', {'topic' : entity.uuid, 'payload' : 1}) }}">Send test payload</a>
+                        {#{% endif %}#}
                         <a class="btn btn-info" href="{{ path(route ~ '_edit', {'id' : entity.id}) }}">Edit</a>
                         <a class="btn btn-danger" href="{{ path(route ~ '_delete', {'id' : entity.id}) }}">Delete</a>
                     </td>
