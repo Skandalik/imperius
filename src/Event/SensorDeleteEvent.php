@@ -18,11 +18,9 @@ class SensorDeleteEvent extends Event
     /** @var string */
     private $action;
 
-    public function __construct(string $id, string $data)
+    public function __construct()
     {
-        $this->id = $id;
-        $this->data = $data;
-        $this->action = SensorEventEnum::$choices[self::NAME];
+        $this->action = SensorEventEnum::$events[self::NAME];
     }
 
     /**

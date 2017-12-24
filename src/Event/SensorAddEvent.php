@@ -11,10 +11,10 @@ class SensorAddEvent extends Event
     const NAME = SensorEventEnum::SENSOR_ADD;
 
     /** @var Sensor */
-   private $entity;
+    private $entity;
 
-   /** @var bool */
-   private $fromScan;
+    /** @var bool */
+    private $fromScan;
 
     /**
      * SensorAddEvent constructor.

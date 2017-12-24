@@ -9,36 +9,38 @@ class SensorUpdateEvent extends Event
 {
     const NAME = SensorEventEnum::SENSOR_UPDATE;
 
-    /** @var string $id */
-    protected $id;
-
-    /** @var string $data */
-    protected $data;
+    /** @var string */
+    protected $uuid;
 
     /** @var string */
-    private $action;
+    protected $data;
 
-    public function __construct(string $id, string $data)
+    /**
+     * SensorUpdateEvent constructor.
+     *
+     * @param string $uuid
+     * @param string $data
+     */
+    public function __construct(string $uuid, string $data)
     {
-        $this->id = $id;
+        $this->uuid = $uuid;
         $this->data = $data;
-        $this->action = self::NAME;
     }
 
     /**
      * @return string
      */
-    public function getId(): string
+    public function getUuid(): string
     {
-        return $this->id;
+        return $this->uuid;
     }
 
     /**
-     * @param string $id
+     * @param string $uuid
      */
-    public function setId(string $id)
+    public function setUuid(string $uuid)
     {
-        $this->id = $id;
+        $this->uuid = $uuid;
     }
 
     /**
@@ -57,11 +59,4 @@ class SensorUpdateEvent extends Event
         $this->data = $data;
     }
 
-    /**
-     * @return string
-     */
-    public function getAction(): string
-    {
-        return $this->action;
-    }
 }

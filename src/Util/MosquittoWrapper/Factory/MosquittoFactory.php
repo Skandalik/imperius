@@ -6,18 +6,12 @@ use Mosquitto\Client;
 
 class MosquittoFactory
 {
-    /**
-     * @var string
-     */
-    private $mosquittoId;
-
-    public function __construct(string $mosquittoId)
+    public function create(string $clientId = '')
     {
-        $this->mosquittoId = $mosquittoId;
-    }
+        if (empty($clientId)) {
+            return new Client();
+        }
 
-    public function create()
-    {
-        return new Client($this->mosquittoId);
+        return new Client($clientId);
     }
 }

@@ -19,23 +19,7 @@ class SensorFoundEvent extends Event
     private $switchable;
 
     /** @var int */
-    private $value;
-
-    /**
-     * SensorFoundEvent constructor.
-     *
-     * @param string $id
-     * @param string $ip
-     * @param bool   $switchable
-     * @param int    $value
-     */
-    public function __construct($id, $ip, $switchable, $value)
-    {
-        $this->uuid = $id;
-        $this->ip = $ip;
-        $this->switchable = $switchable;
-        $this->value = $value;
-    }
+    private $status;
 
     /**
      * @return string
@@ -100,19 +84,19 @@ class SensorFoundEvent extends Event
     /**
      * @return int
      */
-    public function getValue(): int
+    public function getStatus(): int
     {
-        return $this->value;
+        return $this->status;
     }
 
     /**
-     * @param int $value
+     * @param int $status
      *
      * @return SensorFoundEvent
      */
-    public function setValue(int $value): SensorFoundEvent
+    public function setStatus(int $status): SensorFoundEvent
     {
-        $this->value = $value;
+        $this->status = $status;
 
         return $this;
     }

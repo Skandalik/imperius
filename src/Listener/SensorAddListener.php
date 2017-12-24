@@ -2,26 +2,37 @@
 declare(strict_types=1);
 namespace App\Listener;
 
-use App\Entity\Sensor;
 use App\Event\SensorAddEvent;
-use App\Event\SensorFoundEvent;
 use App\Util\MosquittoWrapper\MosquittoPublisher;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class SensorAddListener
 {
-    public function onSensorAdd(
-        SensorAddEvent $event,
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    /** @var MosquittoPublisher */
+    private $mosquittoPublisher;
+
+    public function __construct(
         EntityManagerInterface $entityManager,
         MosquittoPublisher $mosquittoPublisher
     ) {
-        $entityManager->persist($event->getEntity());
-        $entityManager->flush();
+        $this->entityManager = $entityManager;
+        $this->mosquittoPublisher = $mosquittoPublisher;
+    }
+
+    public function onSensorAdd(SensorAddEvent $event) {
+        $this->entityManager->persist($event->getEntity());
+        $this->entityManager->flush();
 
         if ($event->isFromScan()) {
-            $mosquittoPublisher->publish('registered', '', 2, false);
+            $this->mosquittoPublisher->publish($event->getEntity()->getUuid() . '/registered', '', 1, false);
         }
+
+        return;
     }
 
 }

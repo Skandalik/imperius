@@ -18,13 +18,6 @@ class SensorRegisteredEvent extends Event
     /** @var string */
     private $action;
 
-    public function __construct(string $id, string $data)
-    {
-        $this->id = $id;
-        $this->data = $data;
-        $this->action = self::NAME;
-    }
-
     /**
      * @return string
      */

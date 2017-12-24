@@ -2,43 +2,24 @@
 declare(strict_types=1);
 namespace App\Util\MosquittoWrapper;
 
-use App\Util\MosquittoWrapper\Factory\MosquittoFactory;
-use App\Util\MosquittoWrapper\Handler\MosquittoConnectionHandler;
+use App\Util\MosquittoWrapper\Handler\MosquittoHandler;
 
 class MosquittoPublisher
 {
     /**
-     * @var MosquittoFactory
+     * @var MosquittoHandler
      */
-    private $mosquittoFactory;
+    private $mosquittoHandler;
 
-    /**
-     * @var MosquittoConnectionHandler
-     */
-    private $connectionHandler;
-
-    /**
-     * MosquittoPublisher constructor.
-     *
-     * @param MosquittoFactory           $mosquittoFactory
-     * @param MosquittoConnectionHandler $connectionHandler
-     */
-    public function __construct(MosquittoFactory $mosquittoFactory, MosquittoConnectionHandler $connectionHandler)
+    public function __construct(MosquittoHandler $mosquittoHandler)
     {
-        $this->mosquittoFactory = $mosquittoFactory;
-        $this->connectionHandler = $connectionHandler;
+        $this->mosquittoHandler = $mosquittoHandler;
     }
 
     public function publish(string $topic, string $payload, int $qos, bool $retain)
     {
-        $mosquitto = $this->mosquittoFactory->create();
-        $this->connectionHandler->connect($mosquitto);
-
-        $mosquitto->onConnect(function () use ($mosquitto, $topic, $payload, $qos, $retain) {
-            $mosquitto->publish($topic, $payload, $qos, $retain);
-            $this->connectionHandler->disconnect($mosquitto);
-        });
-
-        $mosquitto->loopForever();
+        $this->mosquittoHandler->connect();
+        $this->mosquittoHandler->getClient()->publish($topic, $payload, $qos, $retain);
+        $this->mosquittoHandler->disconnect();
     }
 }
