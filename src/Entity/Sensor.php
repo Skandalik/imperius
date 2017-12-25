@@ -161,32 +161,6 @@ class Sensor
     }
 
     /**
-     * Sensor constructor.
-     */
-    public function __construct()
-    {
-        $this->uuid = $this->createUuid();
-        $this->valueType = $this->createValueType();
-        $this->sensorIp = $this->createSensorIp();
-        $this->switchable = false;
-        $this->createdAt = null;
-        $this->active = false;
-    }
-
-    /**
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
-     */
-    public function prePersist()
-    {
-        $this->setUpdatedAt(new DateTime());
-
-        if (is_null($this->getCreatedAt())) {
-            $this->setCreatedAt(new DateTime());
-        }
-    }
-
-    /**
      * @return string
      */
     public function getUuid()
