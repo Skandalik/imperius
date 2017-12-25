@@ -22,6 +22,22 @@ class SensorFoundEvent extends Event
     private $status;
 
     /**
+     * SensorFoundEvent constructor.
+     *
+     * @param string $uuid
+     * @param string $ip
+     * @param bool   $switchable
+     * @param int    $status
+     */
+    public function __construct(string $uuid, string $ip, bool $switchable, int $status)
+    {
+        $this->uuid = $uuid;
+        $this->ip = $ip;
+        $this->switchable = $switchable;
+        $this->status = $status;
+    }
+
+    /**
      * @return string
      */
     public function getUuid(): string

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Event\SensorUpdateEvent;
 use App\Util\MosquittoWrapper\MosquittoPublisher;
+use App\Util\TopicGenerator\TopicGenerator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -20,7 +21,7 @@ class PublishController extends GenericController
      *
      * @param MosquittoPublisher       $mosquittoPublisher
      * @param EventDispatcherInterface $dispatcher
-     * @param                          $id
+     * @param TopicGenerator           $topicGenerator
      * @param                          $uuid
      * @param                          $status
      *
@@ -29,12 +30,13 @@ class PublishController extends GenericController
     public function setStatusAction(
         MosquittoPublisher $mosquittoPublisher,
         EventDispatcherInterface $dispatcher,
+        TopicGenerator $topicGenerator,
         $uuid,
         $status
     ) {
-        $topic = sprintf("sensor/%s/status/set", $uuid);
+        $topic = $topicGenerator->generate($uuid, ['status', 'set']);
 
-        $mosquittoPublisher->publish($topic, $status, 1, false);
+        $mosquittoPublisher->publish($topic, $status);
 
         $event = new SensorUpdateEvent($uuid, $status);
         $dispatcher->dispatch(SensorUpdateEvent::NAME, $event);

@@ -16,10 +16,14 @@ class MosquittoPublisher
         $this->mosquittoHandler = $mosquittoHandler;
     }
 
-    public function publish(string $topic, string $payload, int $qos, bool $retain)
+    public function publish(string $topic, string $payload = '', int $qos = 1, bool $retain = false)
     {
-        $this->mosquittoHandler->connect();
-        $this->mosquittoHandler->getClient()->publish($topic, $payload, $qos, $retain);
-        $this->mosquittoHandler->disconnect();
+        $this->mosquittoHandler->getClient()->onConnect(function() use ($topic, $payload, $qos, $retain) {
+            $this->mosquittoHandler->getClient()->publish($topic, $payload, $qos, $retain);
+            $this->mosquittoHandler->disconnect();
+        });
+
+        $this->mosquittoHandler->connect('192.168.65.1');
+        $this->mosquittoHandler->getClient()->loopForever();
     }
 }

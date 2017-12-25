@@ -4,6 +4,7 @@ namespace App\Listener;
 
 use App\Event\SensorAddEvent;
 use App\Util\MosquittoWrapper\MosquittoPublisher;
+use App\Util\TopicGenerator\TopicGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 
 class SensorAddListener
@@ -16,20 +17,30 @@ class SensorAddListener
     /** @var MosquittoPublisher */
     private $mosquittoPublisher;
 
+    /**
+     * @var TopicGenerator
+     */
+    private $topicGenerator;
+
     public function __construct(
         EntityManagerInterface $entityManager,
-        MosquittoPublisher $mosquittoPublisher
+        MosquittoPublisher $mosquittoPublisher,
+        TopicGenerator $topicGenerator
     ) {
         $this->entityManager = $entityManager;
         $this->mosquittoPublisher = $mosquittoPublisher;
+        $this->topicGenerator = $topicGenerator;
     }
 
-    public function onSensorAdd(SensorAddEvent $event) {
+    public function onSensorAdd(SensorAddEvent $event)
+    {
         $this->entityManager->persist($event->getEntity());
         $this->entityManager->flush();
 
         if ($event->isFromScan()) {
-            $this->mosquittoPublisher->publish($event->getEntity()->getUuid() . '/registered', '', 1, false);
+            $topic = $this->topicGenerator->generate($event->getEntity()->getUuid(), ['registered']);
+            $this->mosquittoPublisher->publish($topic);
+            echo PHP_EOL . "Sensor saved." . PHP_EOL;
         }
 
         return;
