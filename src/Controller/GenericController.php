@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -60,7 +61,7 @@ class GenericController extends Controller
     {
         $entity = $this->createEntity();
 
-        return $this->handleFormCreation($entity, $request, 'success', 'Success! Entity created!');
+        return $this->handleFormCreation($entity, $request, 'add', 'success', 'Success! Entity created!');
     }
 
     /**
@@ -73,7 +74,7 @@ class GenericController extends Controller
     {
         $entity = $this->createEntity($id);
 
-        return $this->handleFormCreation($entity, $request, 'success', 'Success! Entity edited!');
+        return $this->handleFormCreation($entity, $request, 'edit', 'success', 'Success! Entity edited!');
     }
 
     /**
@@ -114,9 +115,11 @@ class GenericController extends Controller
     private function handleFormCreation(
         $entity,
         Request $request,
+        string $viewName,
         string $typeOfMessage,
         string $message
     ) {
+        /** @var FormInterface $form */
         $form = $this->createForm($this->formType, $entity);
 
         $form->handleRequest($request);
@@ -132,7 +135,7 @@ class GenericController extends Controller
         }
 
         return $this->getView(
-            'add',
+            $viewName,
             [
                 'form' => $form->createView(),
             ]
@@ -193,6 +196,11 @@ class GenericController extends Controller
         $parameters['route'] = $this->route;
 
         return $this->render($this->getViewTemplate($viewName), $parameters);
+    }
+
+    protected function getEntityManager()
+    {
+        return $this->entityManager;
     }
 
     /**

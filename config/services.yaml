@@ -16,7 +16,7 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/*'
-        exclude: '../src/{Entity,Migrations,Tests}'
+        exclude: '../src/{Entity,Migrations,Tests,Event}'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
@@ -26,3 +26,23 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Util\MosquittoWrapper\Handler\MosquittoHandler:
+        arguments:
+            - '%env(MOSQUITTO_BROKER_HOST)%'
+
+    App\Listener\SensorFoundListener:
+        tags:
+            - { name: kernel.event_listener, event: sensor.found }
+
+    App\Listener\SensorAddListener:
+        tags:
+            - { name: kernel.event_listener, event: sensor.add }
+
+    App\Listener\SensorUpdateListener:
+        tags:
+            - { name: kernel.event_listener, event: sensor.update }
+
+    App\Listener\SensorDeleteListener:
+        tags:
+            - { name: kernel.event_listener, event: sensor.delete }
