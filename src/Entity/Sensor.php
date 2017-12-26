@@ -36,25 +36,11 @@ class Sensor
     private $room;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="value_type", type="string", nullable=false)
-     */
-    private $valueType;
-
-    /**
      * @var bool
      *
      * @ORM\Column(name="switchable", type="boolean", nullable=false)
      */
     private $switchable;
-
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="multi_value", type="boolean", nullable=true)
-     */
-    private $multiValue;
 
     /**
      * @var int
@@ -73,9 +59,9 @@ class Sensor
     /**
      * @var int
      *
-     * @ORM\Column(name="value", type="integer", nullable=false)
+     * @ORM\Column(name="status", type="integer", nullable=false)
      */
-    private $value;
+    private $status;
 
     /**
      * @var bool
@@ -119,7 +105,7 @@ class Sensor
     {
         $this
             ->setUuid("")
-            ->setValue(0)
+            ->setStatus(0)
             ->setSwitchable(false)
             ->setActive(false)
             ->setSensorIp("")
@@ -201,26 +187,6 @@ class Sensor
     }
 
     /**
-     * @return string
-     */
-    public function getValueType()
-    {
-        return $this->valueType;
-    }
-
-    /**
-     * @param string $valueType
-     *
-     * @return Sensor
-     */
-    public function setValueType(string $valueType)
-    {
-        $this->valueType = $valueType;
-
-        return $this;
-    }
-
-    /**
      * @return bool
      */
     public function isSwitchable()
@@ -236,26 +202,6 @@ class Sensor
     public function setSwitchable(bool $switchable)
     {
         $this->switchable = $switchable;
-
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMultiValue()
-    {
-        return $this->multiValue;
-    }
-
-    /**
-     * @param bool $multiValue
-     *
-     * @return Sensor
-     */
-    public function setMultiValue(bool $multiValue)
-    {
-        $this->multiValue = $multiValue;
 
         return $this;
     }
@@ -303,19 +249,19 @@ class Sensor
     /**
      * @return int
      */
-    public function getValue()
+    public function getStatus()
     {
-        return $this->value;
+        return $this->status;
     }
 
     /**
-     * @param int $value
+     * @param int $status
      *
      * @return Sensor
      */
-    public function setValue(int $value)
+    public function setStatus(int $status)
     {
-        $this->value = $value;
+        $this->status = $status;
 
         return $this;
     }

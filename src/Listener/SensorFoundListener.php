@@ -25,7 +25,7 @@ class SensorFoundListener
 
         $entity->setUuid($event->getUuid());
         $entity->setSensorIp($event->getIp());
-        $entity->setValue($event->getStatus());
+        $entity->setStatus($event->getStatus());
         $this->setActiveAndStatus($event, $entity);
         $entity->setSwitchable($event->isSwitchable());
 
@@ -46,13 +46,13 @@ class SensorFoundListener
     {
         if (0 !== $event->getStatus()) {
             $entity->setActive(true);
-            $entity->setValue($event->getStatus());
+            $entity->setStatus($event->getStatus());
 
             return $entity;
         }
 
         $entity->setActive(false);
-        $entity->setValue($event->getStatus());
+        $entity->setStatus($event->getStatus());
 
         return $entity;
     }
