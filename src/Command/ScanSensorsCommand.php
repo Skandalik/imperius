@@ -3,7 +3,6 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Event\SensorFoundEvent;
-use App\Util\MosquittoWrapper\MosquittoPublisher;
 use App\Util\TopicGenerator\Enum\TopicEnum;
 use Mosquitto\Client;
 use Mosquitto\Message;
@@ -18,9 +17,6 @@ class ScanSensorsCommand extends ContainerAwareCommand
     /** @var  EventDispatcher */
     private $eventDispatcher;
 
-    /** @var MosquittoPublisher */
-    private $mosquittoPublisher;
-
     protected function configure()
     {
         $this->setName('scan:sensors');
@@ -28,17 +24,14 @@ class ScanSensorsCommand extends ContainerAwareCommand
 
     public function __construct(
         $name = null,
-        EventDispatcherInterface $eventDispatcher,
-        MosquittoPublisher $mosquittoPublisher
+        EventDispatcherInterface $eventDispatcher
     ) {
         parent::__construct($name);
         $this->eventDispatcher = $eventDispatcher;
-        $this->mosquittoPublisher = $mosquittoPublisher;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initializeMosquittoPublisher();
         //TODO popraw tworzenie klienta
         $client = new Client();
 
@@ -69,11 +62,5 @@ class ScanSensorsCommand extends ContainerAwareCommand
 
         $client->loopForever();
         $output->writeln('Exiting gracefully...');
-    }
-
-    private function initializeMosquittoPublisher()
-    {
-        echo 'Initialising Mosquitto Publisher' . PHP_EOL;
-        $this->mosquittoPublisher->publish('sensor/initialise');
     }
 }
