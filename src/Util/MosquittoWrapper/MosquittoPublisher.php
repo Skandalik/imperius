@@ -6,9 +6,7 @@ use App\Util\MosquittoWrapper\Handler\MosquittoHandler;
 
 class MosquittoPublisher
 {
-    /**
-     * @var MosquittoHandler
-     */
+    /** @var MosquittoHandler */
     private $mosquittoHandler;
 
     public function __construct(MosquittoHandler $mosquittoHandler)
@@ -18,12 +16,11 @@ class MosquittoPublisher
 
     public function publish(string $topic, string $payload = '', int $qos = 1, bool $retain = false)
     {
-        $this->mosquittoHandler->getClient()->onConnect(function() use ($topic, $payload, $qos, $retain) {
-            $this->mosquittoHandler->getClient()->publish($topic, $payload, $qos, $retain);
+        $this->mosquittoHandler->getClient()->onPublish(function() {
             $this->mosquittoHandler->disconnect();
         });
 
-        $this->mosquittoHandler->connect('192.168.65.1');
-        $this->mosquittoHandler->getClient()->loopForever();
+        $this->mosquittoHandler->connect();
+        $this->mosquittoHandler->getClient()->publish($topic, $payload, $qos, $retain);
     }
 }

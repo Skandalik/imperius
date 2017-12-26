@@ -39,6 +39,7 @@ class MosquittoHandler
     public function disconnect()
     {
         $this->mosquittoClient->disconnect();
+        unset($this->mosquittoClient);
     }
 
     public function getClient()
