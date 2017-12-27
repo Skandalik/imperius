@@ -6,6 +6,7 @@
 {% block content %}
     <div class="jumbotron">
         <a class="btn btn-primary" href="{{ path(route ~ '_add') }}">Add new Sensor</a>
+        <a class="btn btn-primary" href="{{ path('sensor_check_all_status') }}">Refresh sensors data</a>
         <br>
         <table class="table table-stripped">
             <thead>
@@ -46,12 +47,18 @@
                         {% elseif entity.switchable == true and entity.adjustable == true %}
                             <label for="sensorStatusSet-{{ entity.uuid }}">Value:</label>
                             <input type="range" step="1" min="{{ entity.minimumValue }}" max="{{ entity.maximumValue }}"
-                                   value="{{ entity.status }}" class="sensorStatusSet" id="sensorStatusSet-{{ entity.uuid }}">
-                            <output for="sensorStatusSet-{{ entity.uuid }}" class="sensorStatusOutput" id="sensorStatusOutput-{{ entity.uuid }}">{{ entity.status }}</output>
+                                   value="{{ entity.status }}" class="sensorStatusSet"
+                                   id="sensorStatusSet-{{ entity.uuid }}">
+                            <output for="sensorStatusSet-{{ entity.uuid }}" class="sensorStatusOutput"
+                                    id="sensorStatusOutput-{{ entity.uuid }}">{{ entity.status }}</output>
                             {% if entity.status != 0 %}
                                 <a class="btn btn-info"
-                                   href="{{ path('sensor_set_status', {'uuid' : entity.uuid, 'status' : 0 }) }}">Turn off</a>
+                                   href="{{ path('sensor_set_status', {'uuid' : entity.uuid, 'status' : 0 }) }}">Turn
+                                    off</a>
                             {% endif %}
+                        {% else %}
+                            <a class="btn btn-info"
+                               href="{{ path('sensor_check_single_status', {'uuid' : entity.uuid }) }}">Check status</a>
                         {% endif %}
                         <a class="btn btn-info" href="{{ path(route ~ '_edit', {'id' : entity.id}) }}">Edit</a>
                         <a class="btn btn-danger" href="{{ path(route ~ '_delete', {'id' : entity.id}) }}">Delete</a>
