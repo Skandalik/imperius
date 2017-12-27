@@ -1,15 +1,15 @@
 $(document).ready(function () {
     function outputUpdate(data) {
-        document.querySelector('#sensorStatusOutput').value = data;
+        $(this).closest('.sensorStatusOutput').value = data;
     }
 
-    var sensorStatusElement = $("#sensorStatusSet");
+    var sensorStatusElement = $(".sensorStatusSet");
 
-    sensorStatusElement.on('input', function (element) {
-        outputUpdate($(this).val());
+    sensorStatusElement.on('input', function () {
+        $(this).parent().find('.sensorStatusOutput').val($(this).val());
     });
 
-    sensorStatusElement.on('change', function (element) {
+    sensorStatusElement.on('change', function () {
         var uuid = $(this).closest("#sensor").data('uuid');
         var sensorData = $(this).val();
 

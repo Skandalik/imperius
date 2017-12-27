@@ -44,10 +44,10 @@
                             <a class="btn btn-info"
                                href="{{ path('sensor_set_status', {'uuid' : entity.uuid, 'status' : status }) }}">Turn {{ status | onOffBoolean }}</a>
                         {% elseif entity.switchable == true and entity.adjustable == true %}
-                            <label for="sensorStatusSet">Value:</label>
+                            <label for="sensorStatusSet-{{ entity.uuid }}">Value:</label>
                             <input type="range" step="1" min="{{ entity.minimumValue }}" max="{{ entity.maximumValue }}"
-                                   value="{{ entity.status }}" id="sensorStatusSet">
-                            <output for="sensorStatusSet" id="sensorStatusOutput">{{ entity.status }}</output>
+                                   value="{{ entity.status }}" class="sensorStatusSet" id="sensorStatusSet-{{ entity.uuid }}">
+                            <output for="sensorStatusSet-{{ entity.uuid }}" class="sensorStatusOutput" id="sensorStatusOutput-{{ entity.uuid }}">{{ entity.status }}</output>
                             {% if entity.status != 0 %}
                                 <a class="btn btn-info"
                                    href="{{ path('sensor_set_status', {'uuid' : entity.uuid, 'status' : 0 }) }}">Turn off</a>
