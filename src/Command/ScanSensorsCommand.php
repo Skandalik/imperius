@@ -3,7 +3,9 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Command\Factory\SensorValueRangeFactory;
+use App\Command\ValueObject\SensorValueRangeValueObject;
 use App\Event\SensorFoundEvent;
+use App\Event\SensorUpdateEvent;
 use App\Util\TopicGenerator\Enum\TopicEnum;
 use Mosquitto\Client;
 use Mosquitto\Message;
@@ -42,37 +44,67 @@ class ScanSensorsCommand extends ContainerAwareCommand
         $client = new Client();
 
         $output->writeln("Scanning...");
+
+        /** @var Message $message */
         $client->onMessage(
             function ($message) use ($output) {
-                $output->writeln("Found sensor!");
-                /** @var Message $message */
-                $output->writeln($message->payload);
                 $jsonMessage = json_decode($message->payload, true);
+                switch ($jsonMessage['action']) {
+                    case 'register':
+                        $event = new SensorFoundEvent(
+                            $jsonMessage['uuid'],
+                            $jsonMessage['ip'],
+                            $jsonMessage['switchable'],
+                            $jsonMessage['adjustable'],
+                            $jsonMessage['status'],
+                            $this->getSensorValueRange($jsonMessage)
+                        );
 
-                if ($jsonMessage['adjustable']) {
-                    $sensorValueRange = $this->sensorValueRangeFactory->create($jsonMessage['minValue'], $jsonMessage['maxValue']);
+                        $name = SensorFoundEvent::NAME;
+                        break;
+                    case 'update':
+                        $event = new SensorUpdateEvent(
+                            $jsonMessage['uuid'],
+                            strval($jsonMessage['status'])
+                        );
+
+                        $name = SensorUpdateEvent::NAME;
+                        break;
+                    default:
+                        $event = new SensorUpdateEvent(
+                            $jsonMessage['uuid'],
+                            $jsonMessage['ble']
+                        );
+                        break;
                 }
-
-                $event = new SensorFoundEvent(
-                    $jsonMessage['uuid'],
-                    $jsonMessage['ip'],
-                    $jsonMessage['switchable'],
-                    $jsonMessage['adjustable'],
-                    $jsonMessage['status'],
-                    $sensorValueRange ?? null
-                );
-
-                $this->eventDispatcher->dispatch(SensorFoundEvent::NAME, $event);
+                $this->eventDispatcher->dispatch($name, $event);
             }
         );
 
         $client->connect('192.168.65.1');
-        $output->writeln('Subscribe to topic "register".');
 
         $client->subscribe(TopicEnum::SENSOR_REGISTER, 1);
+        $client->subscribe(TopicEnum::SENSOR_STATUS_RESPONSE, 1);
         $client->subscribe('exit', 1);
 
         $client->loopForever();
         $output->writeln('Exiting gracefully...');
+    }
+
+    /**
+     * @param array $jsonMessage
+     *
+     * @return SensorValueRangeValueObject|null
+     */
+    private function getSensorValueRange(array $jsonMessage)
+    {
+        if ($jsonMessage['adjustable']) {
+            return $this->sensorValueRangeFactory->create(
+                $jsonMessage['minValue'],
+                $jsonMessage['maxValue']
+            );
+        }
+
+        return null;
     }
 }
