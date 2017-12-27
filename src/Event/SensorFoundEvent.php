@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Event;
 
+use App\Command\ValueObject\SensorValueRangeValueObject;
 use App\Event\Enum\SensorEventEnum;
 use Symfony\Component\EventDispatcher\Event;
 
@@ -9,7 +10,7 @@ class SensorFoundEvent extends Event
 {
     const NAME = SensorEventEnum::SENSOR_FOUND;
 
-    /** @var string  */
+    /** @var string */
     private $uuid;
 
     /** @var string */
@@ -21,20 +22,36 @@ class SensorFoundEvent extends Event
     /** @var int */
     private $status;
 
+    /** @var bool */
+    private $adjustable;
+
+    /** @var SensorValueRangeValueObject */
+    private $sensorValueRange;
+
     /**
      * SensorFoundEvent constructor.
      *
-     * @param string $uuid
-     * @param string $ip
-     * @param bool   $switchable
-     * @param int    $status
+     * @param string                      $uuid
+     * @param string                      $ip
+     * @param bool                        $switchable
+     * @param bool                        $adjustable
+     * @param int                         $status
+     * @param SensorValueRangeValueObject | null $sensorValueRange
      */
-    public function __construct(string $uuid, string $ip, bool $switchable, int $status)
-    {
+    public function __construct(
+        string $uuid,
+        string $ip,
+        bool $switchable,
+        bool $adjustable,
+        int $status,
+        $sensorValueRange
+    ) {
         $this->uuid = $uuid;
         $this->ip = $ip;
         $this->switchable = $switchable;
         $this->status = $status;
+        $this->adjustable = $adjustable;
+        $this->sensorValueRange = $sensorValueRange;
     }
 
     /**
@@ -44,19 +61,6 @@ class SensorFoundEvent extends Event
     {
         return $this->uuid;
     }
-
-    /**
-     * @param string $uuid
-     *
-     * @return SensorFoundEvent
-     */
-    public function setUuid(string $uuid): SensorFoundEvent
-    {
-        $this->uuid = $uuid;
-
-        return $this;
-    }
-
     /**
      * @return string
      */
@@ -64,37 +68,12 @@ class SensorFoundEvent extends Event
     {
         return $this->ip;
     }
-
-    /**
-     * @param string $ip
-     *
-     * @return SensorFoundEvent
-     */
-    public function setIp(string $ip): SensorFoundEvent
-    {
-        $this->ip = $ip;
-
-        return $this;
-    }
-
     /**
      * @return bool
      */
     public function isSwitchable(): bool
     {
         return $this->switchable;
-    }
-
-    /**
-     * @param bool $switchable
-     *
-     * @return SensorFoundEvent
-     */
-    public function setSwitchable(bool $switchable): SensorFoundEvent
-    {
-        $this->switchable = $switchable;
-
-        return $this;
     }
 
     /**
@@ -106,15 +85,18 @@ class SensorFoundEvent extends Event
     }
 
     /**
-     * @param int $status
-     *
-     * @return SensorFoundEvent
+     * @return bool
      */
-    public function setStatus(int $status): SensorFoundEvent
+    public function isAdjustable(): bool
     {
-        $this->status = $status;
-
-        return $this;
+        return $this->adjustable;
     }
 
+    /**
+     * @return SensorValueRangeValueObject
+     */
+    public function getSensorValueRange(): SensorValueRangeValueObject
+    {
+        return $this->sensorValueRange;
+    }
 }

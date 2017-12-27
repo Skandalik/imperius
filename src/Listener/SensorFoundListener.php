@@ -28,6 +28,12 @@ class SensorFoundListener
         $entity->setStatus($event->getStatus());
         $this->setActiveAndStatus($event, $entity);
         $entity->setSwitchable($event->isSwitchable());
+        $entity->setAdjustable($event->isAdjustable());
+
+        if ($event->isAdjustable()) {
+            $entity->setMinimumValue($event->getSensorValueRange()->getMinimumValue());
+            $entity->setMaximumValue($event->getSensorValueRange()->getMaximumValue());
+        }
 
         $event = new SensorAddEvent($entity);
 

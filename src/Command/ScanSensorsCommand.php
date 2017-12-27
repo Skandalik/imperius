@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Command;
 
+use App\Command\Factory\SensorValueRangeFactory;
 use App\Event\SensorFoundEvent;
 use App\Util\TopicGenerator\Enum\TopicEnum;
 use Mosquitto\Client;
@@ -17,6 +18,9 @@ class ScanSensorsCommand extends ContainerAwareCommand
     /** @var  EventDispatcher */
     private $eventDispatcher;
 
+    /** @var SensorValueRangeFactory */
+    private $sensorValueRangeFactory;
+
     protected function configure()
     {
         $this->setName('scan:sensors');
@@ -24,10 +28,12 @@ class ScanSensorsCommand extends ContainerAwareCommand
 
     public function __construct(
         $name = null,
-        EventDispatcherInterface $eventDispatcher
+        EventDispatcherInterface $eventDispatcher,
+        SensorValueRangeFactory $sensorValueRangeFactory
     ) {
         parent::__construct($name);
         $this->eventDispatcher = $eventDispatcher;
+        $this->sensorValueRangeFactory = $sensorValueRangeFactory;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -43,11 +49,17 @@ class ScanSensorsCommand extends ContainerAwareCommand
                 $output->writeln($message->payload);
                 $jsonMessage = json_decode($message->payload, true);
 
+                if ($jsonMessage['adjustable']) {
+                    $sensorValueRange = $this->sensorValueRangeFactory->create($jsonMessage['minValue'], $jsonMessage['maxValue']);
+                }
+
                 $event = new SensorFoundEvent(
                     $jsonMessage['uuid'],
                     $jsonMessage['ip'],
                     $jsonMessage['switchable'],
-                    $jsonMessage['status']
+                    $jsonMessage['adjustable'],
+                    $jsonMessage['status'],
+                    $sensorValueRange ?? null
                 );
 
                 $this->eventDispatcher->dispatch(SensorFoundEvent::NAME, $event);

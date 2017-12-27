@@ -43,6 +43,13 @@ class Sensor
     private $switchable;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="adjustable", type="boolean", nullable=false)
+     */
+    private $adjustable;
+
+    /**
      * @var int
      *
      * @ORM\Column(name="minimum_value", type="integer", nullable=true)
@@ -107,6 +114,7 @@ class Sensor
             ->setUuid("")
             ->setStatus(0)
             ->setSwitchable(false)
+            ->setAdjustable(false)
             ->setActive(false)
             ->setSensorIp("")
             ->setCreatedAt(null)
@@ -362,6 +370,26 @@ class Sensor
     public function setLastDataSentAt($lastDataSentAt)
     {
         $this->lastDataSentAt = $lastDataSentAt;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAdjustable()
+    {
+        return $this->adjustable;
+    }
+
+    /**
+     * @param bool $adjustable
+     *
+     * @return Sensor
+     */
+    public function setAdjustable(bool $adjustable)
+    {
+        $this->adjustable = $adjustable;
 
         return $this;
     }
