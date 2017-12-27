@@ -4,29 +4,32 @@ namespace App\Listener;
 
 use App\Entity\Sensor;
 use App\Event\SensorUpdateEvent;
+use App\Repository\SensorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class SensorUpdateListener
 {
+    /** @var SensorRepository */
+    private $sensorRepository;
+
     /** @var EntityManagerInterface */
     private $entityManager;
 
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
+        $this->sensorRepository = $this->entityManager->getRepository(Sensor::class);
     }
 
     public function onSensorUpdate(SensorUpdateEvent $event)
     {
-        //TODO zaprogramuj onSensorUpdate event
-        $sensorRepo = $this->entityManager->getRepository(Sensor::class);
-        /** @var Sensor $entity */
-        $entity = $sensorRepo->findByUuid($event->getUuid());
+        /** @var Sensor $sensor */
+        $sensor = $this->sensorRepository->findByUuid($event->getUuid());
 
-        $entity->setStatus((int)$event->getData());
-        $entity->setActive((bool) $event->getData());
+        $sensor->setStatus((int)$event->getData());
+        $sensor->setActive((bool) $event->getData());
 
-        $this->entityManager->persist($entity);
+        $this->entityManager->persist($sensor);
         $this->entityManager->flush();
 
         return;

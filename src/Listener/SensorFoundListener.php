@@ -5,37 +5,26 @@ namespace App\Listener;
 use App\Entity\Sensor;
 use App\Event\SensorAddEvent;
 use App\Event\SensorFoundEvent;
+use App\Factory\SensorFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class SensorFoundListener
 {
-    /**
-     * @var EventDispatcherInterface
-     */
+    /** @var EventDispatcherInterface */
     private $eventDispatcher;
 
-    public function __construct(EventDispatcherInterface $eventDispatcher)
+    /** @var SensorFactory */
+    private $sensorFactory;
+
+    public function __construct(EventDispatcherInterface $eventDispatcher, SensorFactory $sensorFactory)
     {
         $this->eventDispatcher = $eventDispatcher;
+        $this->sensorFactory = $sensorFactory;
     }
 
     public function onSensorFound(SensorFoundEvent $event)
     {
-        $entity = new Sensor();
-
-        $entity->setUuid($event->getUuid());
-        $entity->setSensorIp($event->getIp());
-        $entity->setStatus($event->getStatus());
-        $this->setActiveAndStatus($event, $entity);
-        $entity->setSwitchable($event->isSwitchable());
-        $entity->setAdjustable($event->isAdjustable());
-
-        if ($event->isAdjustable()) {
-            $entity->setMinimumValue($event->getSensorValueRange()->getMinimumValue());
-            $entity->setMaximumValue($event->getSensorValueRange()->getMaximumValue());
-        }
-
-        $event = new SensorAddEvent($entity);
+        $event = new SensorAddEvent($this->createSensorEntity($event));
 
         $this->eventDispatcher->dispatch(SensorAddEvent::NAME, $event);
 
@@ -44,23 +33,40 @@ class SensorFoundListener
 
     /**
      * @param SensorFoundEvent $event
-     * @param Sensor           $entity
+     * @param Sensor           $sensor
      *
      * @return Sensor
      */
-    private function setActiveAndStatus(SensorFoundEvent $event, $entity): Sensor
+    private function setActiveAndStatus(SensorFoundEvent $event, $sensor): Sensor
     {
-        if (0 !== $event->getStatus()) {
-            $entity->setActive(true);
-            $entity->setStatus($event->getStatus());
+        $sensor->setActive(0 !== $event->getStatus());
+        $sensor->setStatus($event->getStatus());
 
-            return $entity;
+        return $sensor;
+    }
+
+    /**
+     * @param SensorFoundEvent $event
+     *
+     * @return Sensor
+     */
+    private function createSensorEntity(SensorFoundEvent $event)
+    {
+        $sensor = $this->sensorFactory->create();
+
+        $sensor->setUuid($event->getUuid());
+        $sensor->setSensorIp($event->getIp());
+        $sensor->setStatus($event->getStatus());
+        $sensor->setSwitchable($event->isSwitchable());
+        $sensor->setAdjustable($event->isAdjustable());
+        $this->setActiveAndStatus($event, $sensor);
+
+        if ($event->isAdjustable()) {
+            $sensor->setMinimumValue($event->getSensorValueRange()->getMinimumValue());
+            $sensor->setMaximumValue($event->getSensorValueRange()->getMaximumValue());
         }
 
-        $entity->setActive(false);
-        $entity->setStatus($event->getStatus());
-
-        return $entity;
+        return $sensor;
     }
 
 }
