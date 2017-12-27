@@ -40,7 +40,6 @@ class SensorAddListener
         if ($event->isFromScan()) {
             $topic = $this->topicGenerator->generate($event->getEntity()->getUuid(), ['registered']);
             $this->mosquittoPublisher->publish($topic);
-            echo PHP_EOL . "Sensor saved." . PHP_EOL;
         }
 
         return;

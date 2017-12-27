@@ -15,8 +15,8 @@
                 <th scope="col">UUID</th>
                 <th scope="col">Room</th>
                 <th scope="col">Floor</th>
-                <th scope="col">Value type</th>
                 <th scope="col">Switchable</th>
+                <th scope="col">Adjustable</th>
                 <th scope="col">Created at</th>
                 <th scope="col">IP</th>
                 <th scope="col">Value</th>
@@ -26,23 +26,32 @@
             </thead>
             <tbody>
             {% for key, entity in entities %}
-                <tr>
+                <tr id="sensor" data-uuid="{{ entity.uuid }}">
                     <td>{{ entity.id }}</td>
                     <td>{{ entity.name }}</td>
                     <td>{{ entity.uuid }}</td>
                     <td>{% if entity.room is null %} No room set. Set by yourself. {% else %}{{ entity.room.room }}{% endif %}</td>
                     <td>{% if entity.room is null %} No floor set. Set by yourself. {% else %}{{ entity.room.floor }}{% endif %}</td>
-                    <td>{{ entity.valueType }}</td>
-                    <td>{{ entity.switchable }}</td>
+                    <td>{{ entity.switchable | boolToInt }}</td>
+                    <td>{{ entity.adjustable | boolToInt }}</td>
                     <td>{{ entity.createdAt | date('Y-m-d H:i:s') }}</td>
                     <td>{{ entity.sensorIp }}</td>
-                    {% set active = entity.active ? 1 : 0 %}
-                    <td>{{ entity.value }}</td>
-                    <td>{{ active }}</td>
+                    <td>{{ entity.status }}</td>
+                    {% set status = entity.active | inversedBoolToInt %}
+                    <td>{{ entity.active | boolToInt }}</td>
                     <td>
-                        {% if entity.switchable == true  %}
-                            {% set status = entity.active ? 0 : 1 %}
-                            <a class="btn btn-info" href="{{ path('sensor_set_status', {'uuid' : entity.uuid, 'status' : status}) }}">Turn {% if entity.active == true %} off {% else %} on {% endif %}</a>
+                        {% if entity.switchable == true and entity.adjustable == false %}
+                            <a class="btn btn-info"
+                               href="{{ path('sensor_set_status', {'uuid' : entity.uuid, 'status' : status }) }}">Turn {{ status | onOffBoolean }}</a>
+                        {% elseif entity.switchable == true and entity.adjustable == true %}
+                            <label for="sensorStatusSet">Value:</label>
+                            <input type="range" step="1" min="{{ entity.minimumValue }}" max="{{ entity.maximumValue }}"
+                                   value="{{ entity.status }}" id="sensorStatusSet">
+                            <output for="sensorStatusSet" id="sensorStatusOutput">{{ entity.status }}</output>
+                            {% if entity.status != 0 %}
+                                <a class="btn btn-info"
+                                   href="{{ path('sensor_set_status', {'uuid' : entity.uuid, 'status' : 0 }) }}">Turn off</a>
+                            {% endif %}
                         {% endif %}
                         <a class="btn btn-info" href="{{ path(route ~ '_edit', {'id' : entity.id}) }}">Edit</a>
                         <a class="btn btn-danger" href="{{ path(route ~ '_delete', {'id' : entity.id}) }}">Delete</a>

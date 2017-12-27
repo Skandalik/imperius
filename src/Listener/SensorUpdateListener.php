@@ -8,9 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class SensorUpdateListener
 {
-    /**
-     * @var EntityManagerInterface
-     */
+    /** @var EntityManagerInterface */
     private $entityManager;
 
     public function __construct(EntityManagerInterface $entityManager)
@@ -22,9 +20,10 @@ class SensorUpdateListener
     {
         //TODO zaprogramuj onSensorUpdate event
         $sensorRepo = $this->entityManager->getRepository(Sensor::class);
+        /** @var Sensor $entity */
         $entity = $sensorRepo->findByUuid($event->getUuid());
 
-        $entity->setValue((int)$event->getData());
+        $entity->setStatus((int)$event->getData());
         $entity->setActive((bool) $event->getData());
 
         $this->entityManager->persist($entity);

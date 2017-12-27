@@ -14,6 +14,9 @@ class PublishController extends GenericController
      * @Route(
      *     "/sensor/{uuid}/status/set/{status}",
      *     name="sensor_set_status",
+     *     options={
+     *     "expose"=true
+     *     },
      *     requirements={
      *     "status": "\d+"
      * }
