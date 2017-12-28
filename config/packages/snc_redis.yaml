@@ -1,0 +1,6 @@
+snc_redis:
+    clients:
+        sensor_api:
+            type: phpredis
+            alias: sensor_api
+            dsn: "redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%/%env(REDIS_DB_SENSOR_API)%"

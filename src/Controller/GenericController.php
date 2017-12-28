@@ -173,7 +173,7 @@ class GenericController extends Controller
     /**
      * @return EntityRepository|null
      */
-    private function getRepository()
+    protected function getRepository()
     {
         if (empty($this->entityClass)) {
             return null;
