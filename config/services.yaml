@@ -50,3 +50,7 @@ services:
     App\Listener\SensorDeleteListener:
         tags:
             - { name: kernel.event_listener, event: sensor.delete }
+
+    App\Listener\SensorDisconnectListener:
+        tags:
+            - { name: kernel.event_listener, event: sensor.disconnect }

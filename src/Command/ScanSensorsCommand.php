@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Command\Factory\SensorValueRangeFactory;
 use App\Command\ValueObject\SensorValueRangeValueObject;
+use App\Event\SensorDisconnectEvent;
 use App\Event\SensorFoundEvent;
 use App\Event\SensorUpdateEvent;
 use App\Util\TopicGenerator\Enum\TopicEnum;
@@ -70,6 +71,12 @@ class ScanSensorsCommand extends ContainerAwareCommand
 
                         $name = SensorUpdateEvent::NAME;
                         break;
+                    case 'disconnect':
+                        echo "last will";
+                        $event = new SensorDisconnectEvent($jsonMessage['uuid']);
+
+                        $name = SensorDisconnectEvent::NAME;
+                        break;
                     default:
                         $event = new SensorUpdateEvent(
                             $jsonMessage['uuid'],
@@ -85,6 +92,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
 
         $client->subscribe(TopicEnum::SENSOR_REGISTER, 1);
         $client->subscribe(TopicEnum::SENSOR_STATUS_RESPONSE, 1);
+        $client->subscribe(TopicEnum::SENSOR_LAST_WILL, 1);
         $client->subscribe('exit', 1);
 
         $client->loopForever();
