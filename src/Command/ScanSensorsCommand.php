@@ -25,7 +25,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
 
     protected function configure()
     {
-        $this->setName('scan:sensors');
+        $this->setName('sensors:scan');
     }
 
     public function __construct(
