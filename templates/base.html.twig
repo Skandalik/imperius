@@ -9,13 +9,8 @@
 
     <title>{% block title %}Imperius Project{% endblock %}</title>
     {% block stylesheets %}{% endblock %}
-    <script src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
-    <script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
-    <script src="{{ asset('utils/js/bootstrap.js') }}"></script>
-    <script src="{{ asset('utils/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('utils/js/imperius.js') }}"></script>
-    <link href="{{ asset('utils/css/bootstrap.css') }}" rel="stylesheet"/>
     <link rel="stylesheet" href="{{ asset('utils/css/style.css') }}">
+    <link href="{{ asset('utils/css/bootstrap.css') }}" rel="stylesheet"/>
 </head>
 <body>
 <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -45,6 +40,12 @@
     {% block authorization_content %}{% endblock %}
     {% block body %}{% endblock %}
 </div>
+<script src="{{ asset('utils/js/jquery.min.js') }}"></script>
+<script src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
+<script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
+<script src="{{ asset('utils/js/bootstrap.js') }}"></script>
+<script src="{{ asset('utils/js/notify.min.js') }}"></script>
+<script src="{{ asset('utils/js/imperius.js') }}"></script>
 {% block javascripts %}{% endblock %}
 </body>
 </html>

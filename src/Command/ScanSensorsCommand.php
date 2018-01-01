@@ -88,7 +88,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
             }
         );
 
-        $client->connect('192.168.65.1');
+        $client->connect('raspberry.local');
 
         $client->subscribe(TopicEnum::SENSOR_REGISTER, 1);
         $client->subscribe(TopicEnum::SENSOR_STATUS_RESPONSE, 1);

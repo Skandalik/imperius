@@ -25,4 +25,12 @@ class SensorApiController extends FOSRestController
     {
         return $sensorApiRedisRepository->getAll();
     }
+
+    /**
+     * @Rest\Get(path="/api/cache/sensor/create")
+     */
+    public function createSensorCacheAction(SensorApiRedisRepository $sensorApiRedisRepository)
+    {
+        $sensorApiRedisRepository->generateCacheFromDatabase();
+    }
 }

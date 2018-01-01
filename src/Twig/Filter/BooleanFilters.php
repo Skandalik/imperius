@@ -14,6 +14,7 @@ class BooleanFilters extends AbstractExtension
             new TwigFilter('boolToInt', [$this, 'boolToInt']),
             new TwigFilter('inversedBoolToInt', [$this, 'inversedBoolToInt']),
             new TwigFilter('onOffBoolean', [$this, 'onOffBoolean']),
+            new TwigFilter('onOffInt', [$this, 'onOffInt']),
         ];
     }
 
@@ -45,5 +46,15 @@ class BooleanFilters extends AbstractExtension
     public function onOffBoolean($booleanValue): string
     {
         return $booleanValue ? OnOffEnum::ON : OnOffEnum::OFF;
+    }
+
+    /**
+     * @param mixed $integerValue
+     *
+     * @return string
+     */
+    public function onOffInt($integerValue): string
+    {
+        return 1 === $integerValue ? OnOffEnum::ON : OnOffEnum::OFF;
     }
 }
