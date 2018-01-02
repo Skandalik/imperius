@@ -11,6 +11,13 @@ syncs:
     imperius:
         src: '.'
         sync_host_ip: '127.0.0.1'
+        sync_args:
+            - "-ignore='Path .idea'"
+            - "-ignore='Path .git'"
+            - "-ignore='BelowPath .git'"
+            - "-ignore='Path var/cache/*'"
+            - "-ignore='Path var/sessions/*'"
+            - "-ignore='Path node_modules/*'"
         sync_strategy: 'unison'
         sync_prefer: 'src'
         watch_excludes: ['.*/.git', '.*/node_modules', '.*/bower_components', '.*/sass-cache', '.*/.sass-cache', '.*/.sass-cache', '.coffee', '.scss', '.sass', '.gitignore']

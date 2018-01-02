@@ -1,0 +1,3 @@
+#!/bin/bash
+docker/tools/sf cache:clear --no-warmup $@
+docker/tools/sf cache:warmup $@

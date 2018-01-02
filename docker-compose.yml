@@ -6,7 +6,7 @@ services:
         networks:
             - imperius
         volumes:
-            - .:/code
+            - imperius:/code:nocopy
 
     web:
         container_name: web.imperius.home
@@ -35,7 +35,7 @@ services:
         networks:
             - imperius
         volumes:
-            - ../imperius-mysql:/var/lib/mysql
+            - imperius-mysql:/var/lib/mysql:nocopy
         ports:
             - 13333:3306
         environment:
@@ -44,6 +44,11 @@ services:
             - MYSQL_PASSWORD=imperius-project-pass
             - MYSQL_ROOT_PASSWORD=root
 
+    redis:
+        container_name: redis.imperius.home
+        build: ./docker/redis
+        networks:
+            - imperius
 volumes:
     imperius:
         external: true

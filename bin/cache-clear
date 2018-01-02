@@ -1,3 +1,0 @@
-#!/bin/bash
-bin/sf cache:clear --no-warmup $@
-bin/sf cache:warmup $@

@@ -27,6 +27,7 @@ RUN pecl install apcu \
     && docker-php-ext-enable apc --ini-name 20-docker-php-ext-apc.ini
 
 RUN docker-php-ext-configure opcache --enable-opcache
+ADD ./etc/php-opcache.ini /usr/local/etc/php/conf.d/zz-nextcloud-opcache.ini
 
 RUN pecl install Mosquitto-alpha \
     && docker-php-ext-enable mosquitto

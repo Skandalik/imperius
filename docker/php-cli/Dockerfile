@@ -65,3 +65,5 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer
 
 WORKDIR /code
+
+ENTRYPOINT ["php", "bin/console"]
