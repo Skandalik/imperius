@@ -46,19 +46,19 @@ $(document).ready(function () {
         });
     }
 
-    (function worker() {
-        $.ajax({
-            url: 'http://imperius.home:8090/api/sensor',
-            success: function(data) {
-                // if (data.length !== sensorRedisCache.length) {
-                    $('.new-sensors').show();
-                    $.get('http://imperius.home:8090/api/cache/sensor/create');
-                // }
-            },
-            complete: function() {
-                // Schedule the next request when the current one's complete
-                setTimeout(worker, 5000);
-            }
-        });
-    })();
+    // (function worker() {
+    //     $.ajax({
+    //         url: 'http://imperius.home:8090/api/sensor',
+    //         success: function(data) {
+    //             // if (data.length !== sensorRedisCache.length) {
+    //                 $('.new-sensors').show();
+    //                 $.get('http://imperius.home:8090/api/cache/sensor/create');
+    //             // }
+    //         },
+    //         complete: function() {
+    //             // Schedule the next request when the current one's complete
+    //             setTimeout(worker, 5000);
+    //         }
+    //     });
+    // })();
 });

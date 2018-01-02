@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Entity\Traits\IdentityAutoTrait;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
@@ -25,7 +26,7 @@ class Sensor
     /**
      * @var string
      *
-     * @ORM\Column(name="uuid", type="guid", nullable=false, unique=true)
+     * @ORM\Column(name="uuid", type="string", length=50, nullable=false, unique=true)
      */
     private $uuid;
 

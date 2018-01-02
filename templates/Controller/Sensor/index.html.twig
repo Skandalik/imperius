@@ -84,6 +84,8 @@
                                href="{{ path('sensor_check_single_status', {'uuid' : entity.uuid }) }}"><span
                                         class="glyphicon glyphicon glyphicon-refresh"></span> Refresh</a>
                         {% endif %}
+
+                        <a class="btn btn-info" href="#">Behaviors</a>
                         <a class="btn btn-info" href="{{ path(route ~ '_edit', {'id' : entity.id}) }}"><span
                                     class="glyphicon glyphicon glyphicon-pencil"></span></a>
                         <a class="btn btn-danger" href="{{ path(route ~ '_delete', {'id' : entity.id}) }}"><span

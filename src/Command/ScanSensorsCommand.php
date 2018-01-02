@@ -50,13 +50,18 @@ class ScanSensorsCommand extends ContainerAwareCommand
         $client->onMessage(
             function ($message) use ($output) {
                 $jsonMessage = json_decode($message->payload, true);
+                $output->writeln("Status: " . $jsonMessage['status']);
+                if (is_string($jsonMessage['status'])) {
+                    $tempStatus = (float) $jsonMessage['status'];
+                    $jsonMessage['status'] = (int) round($tempStatus);
+                }
                 switch ($jsonMessage['action']) {
                     case 'register':
                         $event = new SensorFoundEvent(
                             $jsonMessage['uuid'],
                             $jsonMessage['ip'],
-                            $jsonMessage['switchable'],
-                            $jsonMessage['adjustable'],
+                            (bool) $jsonMessage['switchable'],
+                            (bool) $jsonMessage['adjustable'],
                             $jsonMessage['status'],
                             $this->getSensorValueRange($jsonMessage)
                         );
@@ -88,10 +93,11 @@ class ScanSensorsCommand extends ContainerAwareCommand
             }
         );
 
-        $client->connect('raspberry.local');
+        $client->connect('192.168.65.1');
 
         $client->subscribe(TopicEnum::SENSOR_REGISTER, 1);
         $client->subscribe(TopicEnum::SENSOR_STATUS_RESPONSE, 1);
+        $client->subscribe(TopicEnum::SENSOR_RESPONSE, 1);
         $client->subscribe(TopicEnum::SENSOR_LAST_WILL, 1);
         $client->subscribe('exit', 1);
 

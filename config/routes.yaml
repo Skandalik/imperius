@@ -9,9 +9,9 @@ login:
 logout:
     path: /logout
 
-overview:
-    path: /overview
-    defaults: { _controller: 'App\Controller\OverviewController::indexAction' }
+#overview:
+#    path: /overview
+#    defaults: { _controller: 'App\Controller\OverviewController::indexAction' }
 
 #sensor:
 #    path: /sensor
