@@ -1,41 +1,38 @@
 import React from 'react';
 import SensorCard from './SensorCard';
-import Card from 'semantic-ui-react/dist/commonjs/views/Card/Card';
+import Segment from 'semantic-ui-react/dist/commonjs/elements/Segment/Segment';
+import Dimmer from 'semantic-ui-react/dist/commonjs/modules/Dimmer/Dimmer';
+import Loader from 'semantic-ui-react/dist/commonjs/elements/Loader/Loader';
+import Grid from 'semantic-ui-react/dist/commonjs/collections/Grid/Grid';
 
-export default function SensorList({ sensors, loading, deleteSensor }) {
+export default function SensorList({ sensors, loading, deleteSensor, checkStatusSensor, setStatusSensor}) {
   const cards = () => {
     return sensors.map(sensor => {
       return (
-        <SensorCard
-          key={sensor.id}
-          sensor={sensor}
-          deleteSensor={deleteSensor}
-        />
+        <Grid.Column key={sensor.id}>
+          <SensorCard
+            key={sensor.id}
+            sensor={sensor}
+            deleteSensor={deleteSensor}
+            checkStatusSensor = {checkStatusSensor}
+            setStatusSensor = {setStatusSensor}
+          />
+        </Grid.Column>
       );
     });
   };
-
-  const loadingSensors = loading => {
-    if (loading) {
-      return (
-        <div>
-          <div className="ui segment">
-            <p />
-            <div className="ui active dimmer">
-              <div className="ui loader" />
-            </div>
-          </div>
-          <h2>Loading sensors...</h2>
-        </div>
-      );
-    }
-    return;
-  };
-
+  
+  const minHeight = { minHeight: 200, width: 'auto', margin: 'auto 0' };
   return (
     <div>
-      {loadingSensors(loading)}
-      <Card.Group>{cards()}</Card.Group>
+      <Segment centered='true' style={minHeight}>
+        <Dimmer inverted active={loading}>
+          <Loader inverted content='Loading sensors...' />
+        </Dimmer>
+        <Grid relaxed container columns={3}>
+            {cards()}
+        </Grid>
+      </Segment>
     </div>
   );
 }

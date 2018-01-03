@@ -1,50 +1,31 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Menu, Dropdown } from 'semantic-ui-react';
+import Segment from 'semantic-ui-react/dist/commonjs/elements/Segment/Segment';
 
 class Header extends React.Component {
+  state = {  }
+  handleClickItem = (e, { name }) => this.setState({ activeItem: name })
+
   render() {
+    const { activeItem } = this.state;
     return (
-      <header>
-        <nav className="navbar navbar-inverse">
-          <div className="container-fluid">
-            <div className="navbar-header">
-              <button
-                type="button"
-                className="navbar-toggle collapsed"
-                data-toggle="collapse"
-                data-target="#navbar"
-                aria-expanded="false"
-                aria-controls="navbar"
-              >
-                <span className="sr-only">Toggle navigation</span>
-                <span className="icon-bar" />
-                <span className="icon-bar" />
-                <span className="icon-bar" />
-              </button>
-              <a className="navbar-brand" href="/">
-                Imperius
-              </a>
-            </div>
-            <div id="navbar" className="navbar-collapse collapse navbar-right">
-              <ul className="nav navbar-nav">
-                <li>
-                  <Link to="/overview"> Overview </Link>
-                </li>
-                <li>
-                  <Link to="/sensor"> Sensor </Link>
-                </li>
-                <li>
-                  <Link to="/room"> Room </Link>
-                </li>
-                <li>
-                  <Link to="/logout"> Logout </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </nav>
-      </header>
-    );
+        <Menu fixed='top' size='large'>
+          <Menu.Item header> Imperius Project</Menu.Item>
+          <Menu.Menu position='right'>
+          <Menu.Item as={Link} to='/overview' name='overview' active={activeItem === 'overview'} onClick={this.handleClickItem}></Menu.Item>
+            <Dropdown item text='Language'>
+              <Dropdown.Menu>
+                <Dropdown.Item>English</Dropdown.Item>
+                <Dropdown.Item>Russian</Dropdown.Item>
+                <Dropdown.Item>Spanish</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+            <Menu.Item as={Link} to='/sensor' name='sensor' active={activeItem === 'sensor'} onClick={this.handleClickItem}></Menu.Item>
+            <Menu.Item as={Link} to='/room' name='room' active={activeItem === 'room'} onClick={this.handleClickItem} />
+          </Menu.Menu>
+        </Menu>
+    )
   }
 }
 

@@ -5,13 +5,22 @@ const defaultState = {
   errors: {}
 };
 
+// TODO popraw refetching sensorów
+
 export default (state = defaultState, action = {}) => {
   switch (action.type) {
+    case 'REFETCH_SENSORS_FULFILLED': {
+      return {
+        ...state,
+        loading: false,
+        sensors: action.payload.data.data || action.payload.data
+      };
+    }
     case 'FETCH_SENSORS_PENDING': {
       return {
         ...state,
         loading: true,
-        sensors: []
+        sensors: state.sensors
       };
     }
     case 'FETCH_SENSORS_FULFILLED': {
@@ -24,7 +33,6 @@ export default (state = defaultState, action = {}) => {
     case 'FETCH_SENSOR_PENDING': {
       return {
         ...state,
-        loading: true,
         sensor: {}
       };
     }
@@ -32,8 +40,47 @@ export default (state = defaultState, action = {}) => {
       return {
         ...state,
         sensor: action.payload.data,
-        loading: false,
         errors: {}
+      };
+    }
+    case 'CHECK_STATUS_PENDING': {
+      let sensor = action.meta.sensorObject
+      sensor.loading = true
+      return {
+        ...state,
+        sensors: state.sensors.map(
+          item => (item.id === sensor.id ? sensor : item)
+        ),
+      };
+    }
+    case 'CHECK_STATUS_FULFILLED': {
+      let sensor = action.payload.action.payload.data
+      sensor.loading = false
+      return {
+        ...state,
+        sensors: state.sensors.map(
+          item => (item.id === sensor.id ? sensor : item)
+        ),
+      };
+    }
+    case 'SET_STATUS_PENDING': {
+      let sensor = action.meta.sensorObject
+      sensor.loading = true
+      return {
+        ...state,
+        sensors: state.sensors.map(
+          item => (item.id === sensor.id ? sensor : item)
+        ),
+      };
+    }
+    case 'SET_STATUS_FULFILLED': {
+      let sensor = action.payload.data
+      sensor.loading = false
+      return {
+        ...state,
+        sensors: state.sensors.map(
+          item => (item.id === sensor.id ? sensor : item)
+        ),
       };
     }
     case 'UPDATE_SENSOR_PENDING': {
@@ -64,14 +111,17 @@ export default (state = defaultState, action = {}) => {
       };
     }
     case 'DELETE_SENSOR_PENDING': {
+      let sensor = action.meta.sensorObject
+      sensor.loading = true
       return {
         ...state,
-        loading: true
+        sensors: state.sensors.map(
+          item => (item.id === sensor.id ? sensor : item)
+        ),
       };
     }
     case 'DELETE_SENSOR_FULFILLED': {
-      const splittedUrl = action.payload.config.url.split('/');
-      const id = parseInt(splittedUrl[splittedUrl.length - 1]);
+      const id = action.meta.sensorObject.id
       return {
         ...state,
         loading: false,

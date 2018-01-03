@@ -2,7 +2,6 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import SensorListPage from '../../pages/sensor/SensorListPage';
 import SensorShowPage from '../../pages/sensor/SensorShowPage';
-import SensorEditPage from '../../pages/sensor/SensorEditPage';
 import SensorFormPage from "../../pages/sensor/SensorFormPage";
 class SensorRoutes extends React.Component {
   render() {

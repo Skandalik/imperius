@@ -1,8 +1,8 @@
 import React from 'react';
 import SensorList from '../../components/sensor/SensorList';
 import { connect } from 'react-redux';
-import { fetchSensors, deleteSensor, fetchSensorsAsync } from '../../actions/SensorActions';
-import timer from 'react-timer-mixin';
+import { fetchSensors, deleteSensor, refetchSensors, checkStatusSensor, setStatusSensor } from '../../actions/SensorActions';
+import ReactInterval from 'react-interval';
 
 class SensorListPage extends React.Component {
   componentDidMount() {
@@ -12,11 +12,19 @@ class SensorListPage extends React.Component {
   render() {
     return (
       <div>
+        <ReactInterval
+          timeout={5000}
+          enabled={true}
+          callback={() => this.props.refetchSensors()}
+        />
+
         <h2>Manage your sensors</h2>
         <SensorList
           sensors={this.props.sensors}
           loading={this.props.loading}
           deleteSensor={this.props.deleteSensor}
+          checkStatusSensor ={this.props.checkStatusSensor}
+          setStatusSensor = {this.props.setStatusSensor}
         />
       </div>
     );
@@ -30,4 +38,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps, { fetchSensors, deleteSensor })(SensorListPage);
+export default connect(mapStateToProps, { refetchSensors, fetchSensors, deleteSensor, checkStatusSensor, setStatusSensor })(SensorListPage);

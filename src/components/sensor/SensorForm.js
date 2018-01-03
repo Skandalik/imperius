@@ -13,11 +13,21 @@ class SensorForm extends React.Component {
   );
 
   componentWillReceiveProps = (nextProps) => {
-      const { sensor } = nextProps;
-      if (sensor.id !== this.props.sensor.id) {
-          this.props.initialize(sensor);
-      }
+    const { rooms, sensor } = nextProps;
+    if (sensor.id !== this.props.sensor.id) {
+      this.props.initialize(sensor);
+    }
   }
+
+  roomOptions = () => {
+    return this.props.rooms.map(room => {
+      const roomLink = '/api/rooms/' + room.id;
+      return (
+        <option key={room.id} value={roomLink}>{room.room}</option>
+      )
+    })
+  }
+
   render() {
     const { handleSubmit, pristine, submitting, loading } = this.props;
 
@@ -32,12 +42,15 @@ class SensorForm extends React.Component {
               component={this.renderField}
               label="Set sensor name"
             />
-            <Field
-              name="room"
-              type="text"
-              component={this.renderField}
-              label="Set sensor room"
-            />
+            <div>
+            <label>Set room where sensor is/will be</label>
+            <div>
+              <Field name="room" type='select' component="select">
+                {this.roomOptions()}
+              </Field>
+            </div>
+          </div>
+
             <Button primary type="submit" disabled={pristine || submitting}>
               Save
             </Button>

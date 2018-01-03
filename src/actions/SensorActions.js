@@ -2,6 +2,15 @@ import { client } from './index';
 
 const url = '/sensors';
 
+export function refetchSensors() {
+  return dispatch => {
+    return dispatch({
+      type: 'REFETCH_SENSORS',
+      payload: client.get(url)
+    });
+  };
+}
+
 export function fetchSensors() {
   return dispatch => {
     return dispatch({
@@ -11,13 +20,28 @@ export function fetchSensors() {
   };
 }
 
-export function fetchSensorsAsync() {
+export function checkStatusSensor(sensor) {
   return dispatch => {
-    setTimeout(()=> {
     return dispatch({
-      type: 'FETCH_SENSORS',
-      payload: client.get(url)
-    }),1000
+      type: 'CHECK_STATUS',
+      meta: {
+        sensorObject: sensor
+      },
+      payload: client.get(`${url}/${sensor.id}/status/check`).then(function (response) {
+        return dispatch(fetchSensor(sensor.id))
+      })
+  });
+  };
+}
+
+export function setStatusSensor(sensor, status) {
+  return dispatch => {
+    return dispatch({
+      type: 'SET_STATUS',
+      meta: {
+        sensorObject: sensor
+      },
+      payload: client.put(`${url}/${sensor.id}/status/set/${status}`)
   });
   };
 }
@@ -41,11 +65,14 @@ export function updateSensor(sensor) {
   };
 }
 
-export function deleteSensor(id) {
+export function deleteSensor(sensor) {
   return dispatch => {
     return dispatch({
       type: 'DELETE_SENSOR',
-      payload: client.delete(`${url}/${id}`)
+      meta: {
+        sensorObject: sensor
+      },
+      payload: client.delete(`${url}/${sensor.id}`)
     });
   };
 }

@@ -2,10 +2,8 @@ import React from 'react';
 import { Redirect } from 'react-router';
 import { SubmissionError } from 'redux-form';
 import { connect } from 'react-redux';
-import {
-  updateSensor,
-  fetchSensor
-} from '../../actions/SensorActions';
+import { updateSensor, fetchSensor } from '../../actions/SensorActions';
+import { fetchRooms } from '../../actions/RoomActions';
 import SensorForm from '../../components/sensor/SensorForm';
 
 class SensorFormPage extends React.Component {
@@ -18,33 +16,20 @@ class SensorFormPage extends React.Component {
     if (id) {
       this.props.fetchSensor(id);
     }
-  }
 
-  logConsole = variable => {
-    return console.log(variable);
-  };
+    this.props.fetchRooms();
+  }
 
   //todo polepsz
   submit = sensor => {
-    if (!sensor.id) {
-      return this.props
-        .saveSensor(sensor)
-        .then(response => {
-          this.setState({ redirect: true });
-        })
-        .catch(err => {
-          throw new SubmissionError(this.props.errors);
-        });
-    } else {
-      return this.props
-        .updateSensor(sensor)
-        .then(response => {
-          this.setState({ redirect: true });
-        })
-        .catch(err => {
-          throw new SubmissionError(this.props.errors);
-        });
-    }
+    return this.props
+      .updateSensor(sensor)
+      .then(response => {
+        this.setState({ redirect: true });
+      })
+      .catch(err => {
+        throw new SubmissionError(this.props.errors);
+      });
   };
 
   render() {
@@ -53,12 +38,13 @@ class SensorFormPage extends React.Component {
         {this.state.redirect ? (
           <Redirect to={'/sensor'} />
         ) : (
-          <SensorForm
-            sensor={this.props.sensor}
-            loading={this.props.loading}
-            onSubmit={this.submit}
-          />
-        )}
+            <SensorForm
+              sensor={this.props.sensor}
+              rooms={this.props.rooms}
+              loading={this.props.loading}
+              onSubmit={this.submit}
+            />
+          )}
       </div>
     );
   }
@@ -67,12 +53,10 @@ class SensorFormPage extends React.Component {
 function mapStateToProps(state) {
   return {
     sensor: state.sensorStore.sensor,
+    rooms: state.roomStore.rooms,
     errors: state.sensorStore.errors,
     loading: state.sensorStore.loading
   };
 }
 
-export default connect(mapStateToProps, {
-  updateSensor,
-  fetchSensor
-})(SensorFormPage);
+export default connect(mapStateToProps, { updateSensor, fetchSensor, fetchRooms })(SensorFormPage);

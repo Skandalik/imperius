@@ -44,7 +44,6 @@ class SensorShow extends React.Component {
         return response.json();
       })
       .then(responseJson => {
-        let sensor = responseJson;
         this.setState({
           sensor: responseJson,
           isLoading: false,
