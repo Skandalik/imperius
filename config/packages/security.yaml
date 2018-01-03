@@ -21,28 +21,28 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        main:
-            pattern: ^/
-            anonymous: ~
-            form_login:
-                login_path: login
-                check_path: login
-                csrf_token_generator: security.csrf.token_manager
-                default_target_path: /overview
+#        main:
+#            pattern: ^/
+#            anonymous: ~
+#            form_login:
+#                login_path: login
+#                check_path: login
+#                csrf_token_generator: security.csrf.token_manager
+#                default_target_path: /overview
+#
+#            logout:
+#                path: /logout
+#                target: /
+#
+#    access_control:
+#        - { path: ^/$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/overview, role: ROLE_USER }
+#        - { path: ^/sensor, role: ROLE_USER }
+#        - { path: ^/room, role: ROLE_USER }
 
-            logout:
-                path: /logout
-                target: /
-
-    access_control:
-        - { path: ^/$, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/overview, role: ROLE_USER }
-        - { path: ^/sensor, role: ROLE_USER }
-        - { path: ^/room, role: ROLE_USER }
-
-    role_hierarchy:
-        ROLE_ADMIN: [ROLE_USER, ROLE_ADMIN]
+#    role_hierarchy:
+#        ROLE_ADMIN: [ROLE_USER, ROLE_ADMIN]
             # activate different ways to authenticate
 
             # http_basic: ~

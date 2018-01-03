@@ -6,8 +6,10 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Entity\Traits\IdentityAutoTrait;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
+ * @ApiResource(attributes={"normalization_context"={"groups"={"get"}}})
  * @ORM\Entity(repositoryClass="App\Repository\SensorRepository")
  * @ORM\HasLifecycleCallbacks
  * @ORM\Table(name="imp_sensor")
@@ -20,6 +22,7 @@ class Sensor
      * @var string
      *
      * @ORM\Column(name="name", type="string", nullable=true)
+     * @Groups({"get"})
      */
     private $name;
 
@@ -27,12 +30,15 @@ class Sensor
      * @var string
      *
      * @ORM\Column(name="uuid", type="string", length=50, nullable=false, unique=true)
+     * @Groups({"get"})
      */
     private $uuid;
 
     /**
      * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom")
      * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=true)
+     *
+     * @Groups({"get"})
      */
     private $room;
 
@@ -40,6 +46,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="switchable", type="boolean", nullable=false)
+     * @Groups({"get"})
      */
     private $switchable;
 
@@ -47,6 +54,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="adjustable", type="boolean", nullable=false)
+     * @Groups({"get"})
      */
     private $adjustable;
 
@@ -54,6 +62,7 @@ class Sensor
      * @var int
      *
      * @ORM\Column(name="minimum_value", type="integer", nullable=true)
+     * @Groups({"get"})
      */
     private $minimumValue;
 
@@ -61,6 +70,7 @@ class Sensor
      * @var int
      *
      * @ORM\Column(name="maximum_value", type="integer", nullable=true)
+     * @Groups({"get"})
      */
     private $maximumValue;
 
@@ -68,6 +78,7 @@ class Sensor
      * @var int
      *
      * @ORM\Column(name="status", type="integer", nullable=false)
+     * @Groups({"get"})
      */
     private $status;
 
@@ -75,6 +86,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="active", type="boolean", nullable=false)
+     * @Groups({"get"})
      */
     private $active;
 
@@ -224,11 +236,11 @@ class Sensor
     }
 
     /**
-     * @param int $minimumValue
+     * @param int | null $minimumValue
      *
      * @return Sensor
      */
-    public function setMinimumValue(int $minimumValue)
+    public function setMinimumValue($minimumValue)
     {
         $this->minimumValue = $minimumValue;
 
@@ -236,7 +248,7 @@ class Sensor
     }
 
     /**
-     * @return int
+     * @return int | null
      */
     public function getMaximumValue()
     {
@@ -244,11 +256,11 @@ class Sensor
     }
 
     /**
-     * @param int $maximumValue
+     * @param int | null $maximumValue
      *
      * @return Sensor
      */
-    public function setMaximumValue(int $maximumValue)
+    public function setMaximumValue($maximumValue)
     {
         $this->maximumValue = $maximumValue;
 

@@ -5,6 +5,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,14 +25,19 @@ class GenericController extends Controller
     /** @var EntityManager */
     private $entityManager;
 
+    /** @var SerializerInterface */
+    private $serializer;
+
     /**
      * GenericController constructor.
      *
      * @param EntityManagerInterface $entityManager
+     * @param SerializerInterface    $serializer
      */
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, SerializerInterface $serializer)
     {
         $this->entityManager = $entityManager;
+        $this->serializer = $serializer;
         $this->route = $this->extractRoute();
     }
 
@@ -102,6 +108,14 @@ class GenericController extends Controller
         $this->addFlashMessage($request, 'success', 'Success! Entity deleted.');
 
         return $this->redirectToRoute('sensor');
+    }
+
+    /**
+     * @return SerializerInterface
+     */
+    public function getSerializer(): SerializerInterface
+    {
+        return $this->serializer;
     }
 
     /**
