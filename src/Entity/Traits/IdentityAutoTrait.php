@@ -10,7 +10,7 @@ trait IdentityAutoTrait
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @Groups({"get"})
+     * @Groups({"room", "sensor", "behavior"})
      */
     protected $id;
 

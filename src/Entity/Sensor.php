@@ -3,16 +3,19 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use App\Entity\Traits\IdentityAutoTrait;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
- * @ApiResource(attributes={"normalization_context"={"groups"={"get"}}})
+ * @ApiResource(attributes={"normalization_context"={"groups"={"sensor"}}})
  * @ORM\Entity(repositoryClass="App\Repository\SensorRepository")
- * @ORM\HasLifecycleCallbacks
  * @ORM\Table(name="imp_sensor")
+ * @ORM\HasLifecycleCallbacks
  */
 class Sensor
 {
@@ -22,7 +25,7 @@ class Sensor
      * @var string
      *
      * @ORM\Column(name="name", type="string", nullable=true)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $name;
 
@@ -30,7 +33,7 @@ class Sensor
      * @var string
      *
      * @ORM\Column(name="uuid", type="string", length=50, nullable=false, unique=true)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $uuid;
 
@@ -38,7 +41,7 @@ class Sensor
      * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom")
      * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=true)
      *
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $room;
 
@@ -46,7 +49,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="switchable", type="boolean", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $switchable;
 
@@ -54,7 +57,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="adjustable", type="boolean", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $adjustable;
 
@@ -62,7 +65,7 @@ class Sensor
      * @var int
      *
      * @ORM\Column(name="minimum_value", type="integer", nullable=true)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $minimumValue;
 
@@ -70,7 +73,7 @@ class Sensor
      * @var int
      *
      * @ORM\Column(name="maximum_value", type="integer", nullable=true)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $maximumValue;
 
@@ -78,7 +81,7 @@ class Sensor
      * @var int
      *
      * @ORM\Column(name="status", type="integer", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $status;
 
@@ -86,7 +89,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="active", type="boolean", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $active;
 
@@ -119,6 +122,16 @@ class Sensor
     private $lastDataSentAt;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="Behavior", mappedBy="sourceSensor")
+     * @Groups({"sensor"})
+     * @MaxDepth(1)
+     * @ApiSubresource()
+     */
+    private $behaviors;
+
+    /**
      * Sensor constructor.
      */
     public function __construct()
@@ -132,6 +145,7 @@ class Sensor
             ->setSensorIp("")
             ->setCreatedAt(null)
         ;
+        $this->behaviors = new ArrayCollection();
     }
 
     /**
@@ -407,4 +421,37 @@ class Sensor
         return $this;
     }
 
+    /**
+     * @return ArrayCollection
+     */
+    public function getBehaviors()
+    {
+        return $this->behaviors;
+    }
+
+    /**
+     * @param ArrayCollection $behaviors
+     */
+    public function setBehaviors(ArrayCollection $behaviors)
+    {
+        $this->behaviors = $behaviors;
+    }
+
+    /**
+     * @param Behavior $behavior
+     */
+    public function addBehavior(Behavior $behavior)
+    {
+        $behavior->setSourceSensor($this);
+        $this->behaviors->add($behavior);
+    }
+
+    /**
+     * @param Behavior $behavior
+     */
+    public function removeBehavior(Behavior $behavior)
+    {
+        $behavior->setSourceSensor(null);
+        $this->behaviors->removeElement($behavior);
+    }
 }

@@ -3,7 +3,6 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use ApiPlatform\Core\Annotation\ApiSubresource;
 use App\Entity\Traits\IdentityAutoTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -11,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource(attributes={"normalization_context"={"groups"={"get"}}})
+ * @ApiResource(attributes={"normalization_context"={"groups"={"room"}}})
  * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="App\Repository\RoomRepository")
  * @ORM\Table(name="imp_room")
@@ -24,7 +23,7 @@ class Room
      * @var string
      *
      * @ORM\Column(name="room", type="string", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"room", "sensor"})
      */
     private $room;
 
@@ -39,7 +38,7 @@ class Room
      * @var int
      *
      * @ORM\Column(name="floor", type="integer", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"room", "sensor"})
      */
     private $floor;
 

@@ -7,11 +7,9 @@ use App\Event\SensorUpdateEvent;
 use App\Form\SensorType;
 use App\Util\MosquittoWrapper\MosquittoPublisher;
 use App\Util\TopicGenerator\TopicGenerator;
-use JMS\Serializer\SerializerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class SensorController extends GenericController
@@ -88,7 +86,6 @@ class SensorController extends GenericController
         return $this->serializeObject($sensor);
     }
 
-
     /**
      * @Route(
      *     name="check_bulk_status",
@@ -98,8 +95,8 @@ class SensorController extends GenericController
      *     }
      * )
      * @Method("GET")
-     * @param MosquittoPublisher       $mosquittoPublisher
-     * @param TopicGenerator           $topicGenerator
+     * @param MosquittoPublisher $mosquittoPublisher
+     * @param TopicGenerator     $topicGenerator
      *
      * @return Response
      */
@@ -121,8 +118,9 @@ class SensorController extends GenericController
      */
     private function serializeObject($sensor): Response
     {
-        $response =new Response($this->getSerializer()->serialize($sensor, 'json'));
+        $response = new Response($this->getSerializer()->serialize($sensor, 'json'));
         $response->headers->set('Content-Type', 'application/json');
+
         return $response;
     }
 }
