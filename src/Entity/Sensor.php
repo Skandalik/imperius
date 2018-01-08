@@ -9,10 +9,13 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
- * @ApiResource(attributes={"normalization_context"={"groups"={"sensor"}}})
+ * @ApiResource(
+ *     attributes={
+ *      "normalization_context"={"groups"={"sensor"}},
+ *      "force_eager"=false
+ *     })
  * @ORM\Entity(repositoryClass="App\Repository\SensorRepository")
  * @ORM\Table(name="imp_sensor")
  * @ORM\HasLifecycleCallbacks
@@ -25,7 +28,7 @@ class Sensor
      * @var string
      *
      * @ORM\Column(name="name", type="string", nullable=true)
-     * @Groups({"sensor"})
+     * @Groups({"sensor", "behavior"})
      */
     private $name;
 
@@ -33,7 +36,7 @@ class Sensor
      * @var string
      *
      * @ORM\Column(name="uuid", type="string", length=50, nullable=false, unique=true)
-     * @Groups({"sensor"})
+     * @Groups({"sensor", "behavior"})
      */
     private $uuid;
 
@@ -41,7 +44,7 @@ class Sensor
      * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom")
      * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=true)
      *
-     * @Groups({"sensor"})
+     * @Groups({"sensor", "behavior"})
      */
     private $room;
 
@@ -124,9 +127,8 @@ class Sensor
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="Behavior", mappedBy="sourceSensor")
+     * @ORM\OneToMany(targetEntity="Behavior", mappedBy="sourceSensor", cascade={"persist", "remove"})
      * @Groups({"sensor"})
-     * @MaxDepth(1)
      * @ApiSubresource()
      */
     private $behaviors;

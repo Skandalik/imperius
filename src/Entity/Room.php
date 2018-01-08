@@ -23,7 +23,7 @@ class Room
      * @var string
      *
      * @ORM\Column(name="room", type="string", nullable=false)
-     * @Groups({"room", "sensor"})
+     * @Groups({"room", "sensor", "behavior"})
      */
     private $room;
 
@@ -38,7 +38,7 @@ class Room
      * @var int
      *
      * @ORM\Column(name="floor", type="integer", nullable=false)
-     * @Groups({"room", "sensor"})
+     * @Groups({"room", "sensor", "behavior"})
      */
     private $floor;
 

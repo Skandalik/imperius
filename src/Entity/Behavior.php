@@ -8,7 +8,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource(attributes={"normalization_context"={"groups"={"behavior"}}})
+ * @ApiResource(
+ *     attributes={
+ *      "normalization_context"={"groups"={"behavior"}},
+ *      "force_eager"=false
+ *     })
  * @ORM\Entity(repositoryClass="App\Repository\BehaviorRepository")
  * @ORM\Table(name="imp_behavior")
  */
@@ -27,22 +31,32 @@ class Behavior
 
     /**
      * @var string
-     * @ORM\Column(name="property", type="string", columnDefinition="ENUM('active', 'status')", nullable=false)
+     *
+     * @ORM\Column(name="source_property", type="string", columnDefinition="ENUM('active', 'status')", nullable=false)
      * @Groups({"behavior"})
      */
-    private $property;
+    private $sourceProperty;
 
     /**
      * @var string
-     * @ORM\Column(name="behavior_condition", type="string", nullable=false)
+     *
+     * @ORM\Column(name="predicate", type="string", nullable=false)
      * @Groups({"behavior"})
      */
-    private $behaviorCondition;
+    private $predicate;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="predicate_argument", type="string", nullable=false)
+     * @Groups({"behavior"})
+     */
+    private $predicateArgument;
 
     /**
      * @var Sensor
      *
-     * @ORM\ManyToOne(targetEntity="Sensor")
+     * @ORM\ManyToOne(targetEntity="Sensor", cascade={"persist"})
      * @ORM\JoinColumn(name="dependent_sensor_id", referencedColumnName="id", nullable=false)
      * @Groups({"behavior"})
      */
@@ -50,17 +64,26 @@ class Behavior
 
     /**
      * @var string
-     * @ORM\Column(type="string", columnDefinition="ENUM('active', 'status')", nullable=false)
+     *
+     * @ORM\Column(name="dependent_property", type="string", columnDefinition="ENUM('active', 'status')", nullable=false)
      * @Groups({"behavior"})
      */
-    private $dependentSensorProperty;
+    private $dependentProperty;
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="action", type="string", nullable=false)
+     * @Groups({"behavior"})
+     */
+    private $action;
 
     /**
      * @var string
-     * @ORM\Column(name="behavior_action", type="string", nullable=false)
+     *
+     * @ORM\Column(name="action_argument", type="string", nullable=false)
      * @Groups({"behavior"})
      */
-    private $behaviorAction;
+    private $actionArgument;
 
     /**
      * @return Sensor
@@ -95,19 +118,19 @@ class Behavior
     /**
      * @return string
      */
-    public function getProperty(): string
+    public function getSourceProperty(): string
     {
-        return $this->property;
+        return $this->sourceProperty;
     }
 
     /**
-     * @param string $property
+     * @param string $sourceProperty
      *
      * @return Behavior
      */
-    public function setProperty(string $property): Behavior
+    public function setSourceProperty(string $sourceProperty): Behavior
     {
-        $this->property = $property;
+        $this->sourceProperty = $sourceProperty;
 
         return $this;
     }
@@ -115,19 +138,19 @@ class Behavior
     /**
      * @return string
      */
-    public function getBehaviorCondition(): string
+    public function getPredicate(): string
     {
-        return $this->behaviorCondition;
+        return $this->predicate;
     }
 
     /**
-     * @param string $behaviorCondition
+     * @param string $predicate
      *
      * @return Behavior
      */
-    public function setBehaviorCondition(string $behaviorCondition): Behavior
+    public function setPredicate(string $predicate): Behavior
     {
-        $this->behaviorCondition = $behaviorCondition;
+        $this->predicate = $predicate;
 
         return $this;
     }
@@ -155,19 +178,19 @@ class Behavior
     /**
      * @return string
      */
-    public function getDependentSensorProperty(): string
+    public function getDependentProperty(): string
     {
-        return $this->dependentSensorProperty;
+        return $this->dependentProperty;
     }
 
     /**
-     * @param string $dependentSensorProperty
+     * @param string $dependentProperty
      *
      * @return Behavior
      */
-    public function setDependentSensorProperty(string $dependentSensorProperty): Behavior
+    public function setDependentProperty(string $dependentProperty): Behavior
     {
-        $this->dependentSensorProperty = $dependentSensorProperty;
+        $this->dependentProperty = $dependentProperty;
 
         return $this;
     }
@@ -175,20 +198,52 @@ class Behavior
     /**
      * @return string
      */
-    public function getBehaviorAction(): string
+    public function getAction(): string
     {
-        return $this->behaviorAction;
+        return $this->action;
     }
 
     /**
-     * @param string $behaviorAction
+     * @param string $action
      *
      * @return Behavior
      */
-    public function setBehaviorAction(string $behaviorAction): Behavior
+    public function setAction(string $action): Behavior
     {
-        $this->behaviorAction = $behaviorAction;
+        $this->action = $action;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPredicateArgument(): string
+    {
+        return $this->predicateArgument;
+    }
+
+    /**
+     * @param string $predicateArgument
+     */
+    public function setPredicateArgument(string $predicateArgument)
+    {
+        $this->predicateArgument = $predicateArgument;
+    }
+
+    /**
+     * @return string
+     */
+    public function getActionArgument(): string
+    {
+        return $this->actionArgument;
+    }
+
+    /**
+     * @param string $actionArgument
+     */
+    public function setActionArgument(string $actionArgument)
+    {
+        $this->actionArgument = $actionArgument;
     }
 }

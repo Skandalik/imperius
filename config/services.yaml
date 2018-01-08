@@ -54,3 +54,7 @@ services:
     App\Listener\SensorDisconnectListener:
         tags:
             - { name: kernel.event_listener, event: sensor.disconnect }
+
+    App\Util\BehaviorApplet\Checker\BehaviorChecker:
+        tags:
+            - { name: kernel.event_listener, event: sensor.update, method: listenOnSensorUpdate }
