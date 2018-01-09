@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use App\Entity\Traits\IdentityAutoTrait;
+use App\Type\SensorStateEnumType;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -51,6 +52,14 @@ class Sensor
     /**
      * @var bool
      *
+     * @ORM\Column(name="fetchable", type="boolean", nullable=false)
+     * @Groups({"sensor", "behavior"})
+     */
+    private $fetchable;
+
+    /**
+     * @var bool
+     *
      * @ORM\Column(name="switchable", type="boolean", nullable=false)
      * @Groups({"sensor", "behavior"})
      */
@@ -89,12 +98,12 @@ class Sensor
     private $status;
 
     /**
-     * @var bool
+     * @var string
      *
-     * @ORM\Column(name="active", type="boolean", nullable=false)
+     * @ORM\Column(name="state", type="sensor_state", nullable=false)
      * @Groups({"sensor"})
      */
-    private $active;
+    private $state;
 
     /**
      * @var string
@@ -141,9 +150,10 @@ class Sensor
         $this
             ->setUuid("")
             ->setStatus(0)
+            ->setFetchable(false)
             ->setSwitchable(false)
             ->setAdjustable(false)
-            ->setActive(false)
+            ->setState(SensorStateEnumType::SENSOR_INACTIVE)
             ->setSensorIp("")
             ->setCreatedAt(null)
         ;
@@ -304,26 +314,6 @@ class Sensor
     }
 
     /**
-     * @return bool
-     */
-    public function isActive()
-    {
-        return $this->active;
-    }
-
-    /**
-     * @param bool $active
-     *
-     * @return Sensor
-     */
-    public function setActive(bool $active)
-    {
-        $this->active = $active;
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getSensorIp()
@@ -419,6 +409,46 @@ class Sensor
     public function setAdjustable(bool $adjustable)
     {
         $this->adjustable = $adjustable;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFetchable(): bool
+    {
+        return $this->fetchable;
+    }
+
+    /**
+     * @param $fetchable
+     *
+     * @return Sensor
+     */
+    public function setFetchable($fetchable): Sensor
+    {
+        $this->fetchable = $fetchable;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getState(): string
+    {
+        return $this->state;
+    }
+
+    /**
+     * @param $state
+     *
+     * @return Sensor
+     */
+    public function setState($state): Sensor
+    {
+        $this->state = $state;
 
         return $this;
     }

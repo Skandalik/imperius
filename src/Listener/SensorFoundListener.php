@@ -6,6 +6,7 @@ use App\Entity\Sensor;
 use App\Event\SensorAddEvent;
 use App\Event\SensorFoundEvent;
 use App\Factory\SensorFactory;
+use App\Type\SensorStateEnumType;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class SensorFoundListener
@@ -33,20 +34,6 @@ class SensorFoundListener
 
     /**
      * @param SensorFoundEvent $event
-     * @param Sensor           $sensor
-     *
-     * @return Sensor
-     */
-    private function setActiveAndStatus(SensorFoundEvent $event, $sensor): Sensor
-    {
-        $sensor->setActive(0 !== $event->getStatus());
-        $sensor->setStatus($event->getStatus());
-
-        return $sensor;
-    }
-
-    /**
-     * @param SensorFoundEvent $event
      *
      * @return Sensor
      */
@@ -57,9 +44,11 @@ class SensorFoundListener
         $sensor->setUuid($event->getUuid());
         $sensor->setSensorIp($event->getIp());
         $sensor->setStatus($event->getStatus());
+        $sensor->setFetchable($event->isFetchable());
         $sensor->setSwitchable($event->isSwitchable());
         $sensor->setAdjustable($event->isAdjustable());
-        $this->setActiveAndStatus($event, $sensor);
+        $sensor->setState(SensorStateEnumType::SENSOR_ACTIVE);
+        $sensor->setStatus($event->getStatus());
 
         if ($event->isAdjustable()) {
             $sensor->setMinimumValue($event->getSensorValueRange()->getMinimumValue());

@@ -26,7 +26,7 @@ class SensorDisconnectListener
         /** @var Sensor $sensor */
         $sensor = $this->sensorRepository->findByUuid($event->getUuid());
 
-        $sensor->setActive($event->getActive());
+        $sensor->setState($event->getState());
 
         $this->entityManager->persist($sensor);
         $this->entityManager->flush();

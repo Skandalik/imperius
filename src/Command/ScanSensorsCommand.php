@@ -60,6 +60,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
                         $event = new SensorFoundEvent(
                             $jsonMessage['uuid'],
                             $jsonMessage['ip'],
+                            (bool) $jsonMessage['fetchable'],
                             (bool) $jsonMessage['switchable'],
                             (bool) $jsonMessage['adjustable'],
                             $jsonMessage['status'],
@@ -93,7 +94,11 @@ class ScanSensorsCommand extends ContainerAwareCommand
             }
         );
 
+        $output->writeln("Connecting.");
         $client->connect('192.168.65.1');
+        $output->writeln("Connected. Publishing...");
+
+        $client->publish('command', '', 1, false);
 
         $client->subscribe(TopicEnum::SENSOR_REGISTER, 1);
         $client->subscribe(TopicEnum::SENSOR_STATUS_RESPONSE, 1);

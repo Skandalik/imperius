@@ -32,26 +32,18 @@ class Behavior
     /**
      * @var string
      *
-     * @ORM\Column(name="source_property", type="string", columnDefinition="ENUM('active', 'status')", nullable=false)
+     * @ORM\Column(name="source_condition", type="sensor_conditions_enum", nullable=false)
      * @Groups({"behavior"})
      */
-    private $sourceProperty;
+    private $sourceCondition;
 
     /**
-     * @var string
+     * @var int
      *
-     * @ORM\Column(name="predicate", type="string", nullable=false)
+     * @ORM\Column(name="source_argument", type="integer", nullable=true)
      * @Groups({"behavior"})
      */
-    private $predicate;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="predicate_argument", type="string", nullable=false)
-     * @Groups({"behavior"})
-     */
-    private $predicateArgument;
+    private $sourceArgument;
 
     /**
      * @var Sensor
@@ -65,22 +57,15 @@ class Behavior
     /**
      * @var string
      *
-     * @ORM\Column(name="dependent_property", type="string", columnDefinition="ENUM('active', 'status')", nullable=false)
+     * @ORM\Column(name="dependent_action", type="sensor_actions_enum", nullable=false)
      * @Groups({"behavior"})
      */
-    private $dependentProperty;
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="action", type="string", nullable=false)
-     * @Groups({"behavior"})
-     */
-    private $action;
+    private $dependentAction;
 
     /**
-     * @var string
+     * @var int
      *
-     * @ORM\Column(name="action_argument", type="string", nullable=false)
+     * @ORM\Column(name="action_argument", type="integer", nullable=true)
      * @Groups({"behavior"})
      */
     private $actionArgument;
@@ -116,46 +101,6 @@ class Behavior
     }
 
     /**
-     * @return string
-     */
-    public function getSourceProperty(): string
-    {
-        return $this->sourceProperty;
-    }
-
-    /**
-     * @param string $sourceProperty
-     *
-     * @return Behavior
-     */
-    public function setSourceProperty(string $sourceProperty): Behavior
-    {
-        $this->sourceProperty = $sourceProperty;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPredicate(): string
-    {
-        return $this->predicate;
-    }
-
-    /**
-     * @param string $predicate
-     *
-     * @return Behavior
-     */
-    public function setPredicate(string $predicate): Behavior
-    {
-        $this->predicate = $predicate;
-
-        return $this;
-    }
-
-    /**
      * @return Sensor
      */
     public function getDependentSensor(): Sensor
@@ -178,19 +123,39 @@ class Behavior
     /**
      * @return string
      */
-    public function getDependentProperty(): string
+    public function getSourceCondition(): string
     {
-        return $this->dependentProperty;
+        return $this->sourceCondition;
     }
 
     /**
-     * @param string $dependentProperty
+     * @param string $sourceCondition
      *
      * @return Behavior
      */
-    public function setDependentProperty(string $dependentProperty): Behavior
+    public function setSourceCondition(string $sourceCondition)
     {
-        $this->dependentProperty = $dependentProperty;
+        $this->sourceCondition = $sourceCondition;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSourceArgument(): int
+    {
+        return $this->sourceArgument;
+    }
+
+    /**
+     * @param int | null $sourceArgument
+     *
+     * @return Behavior
+     */
+    public function setSourceArgument($sourceArgument)
+    {
+        $this->sourceArgument = $sourceArgument;
 
         return $this;
     }
@@ -198,52 +163,42 @@ class Behavior
     /**
      * @return string
      */
-    public function getAction(): string
+    public function getDependentAction(): string
     {
-        return $this->action;
+        return $this->dependentAction;
     }
 
     /**
-     * @param string $action
+     * @param string $dependentAction
      *
      * @return Behavior
      */
-    public function setAction(string $action): Behavior
+    public function setDependentAction(string $dependentAction)
     {
-        $this->action = $action;
+        $this->dependentAction = $dependentAction;
 
         return $this;
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getPredicateArgument(): string
-    {
-        return $this->predicateArgument;
-    }
-
-    /**
-     * @param string $predicateArgument
-     */
-    public function setPredicateArgument(string $predicateArgument)
-    {
-        $this->predicateArgument = $predicateArgument;
-    }
-
-    /**
-     * @return string
-     */
-    public function getActionArgument(): string
+    public function getActionArgument(): int
     {
         return $this->actionArgument;
     }
 
     /**
-     * @param string $actionArgument
+     * @param int | null $actionArgument
+     *
+     * @return Behavior
      */
-    public function setActionArgument(string $actionArgument)
+    public function setActionArgument($actionArgument)
     {
         $this->actionArgument = $actionArgument;
+
+        return $this;
     }
+
+
 }

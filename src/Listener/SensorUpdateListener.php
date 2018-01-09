@@ -27,7 +27,6 @@ class SensorUpdateListener
         $sensor = $this->sensorRepository->findByUuid($event->getUuid());
 
         $sensor->setStatus((int)$event->getData());
-        $sensor->setActive((bool) $event->getData());
 
         $this->entityManager->persist($sensor);
         $this->entityManager->flush();
