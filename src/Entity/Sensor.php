@@ -52,7 +52,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="switchable", type="boolean", nullable=false)
-     * @Groups({"sensor"})
+     * @Groups({"sensor", "behavior"})
      */
     private $switchable;
 
@@ -60,7 +60,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="adjustable", type="boolean", nullable=false)
-     * @Groups({"sensor"})
+     * @Groups({"sensor", "behavior"})
      */
     private $adjustable;
 
