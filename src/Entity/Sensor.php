@@ -145,6 +145,15 @@ class Sensor
     private $behaviors;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="ScheduledBehavior", mappedBy="sensor", orphanRemoval=true, cascade={"persist", "refresh"})
+     * @Groups({"sensor"})
+     * @ApiSubresource()
+     */
+    private $scheduledBehaviors;
+
+    /**
      * Sensor constructor.
      */
     public function __construct()
@@ -494,6 +503,46 @@ class Sensor
     {
         $this->behaviors->removeElement($behavior);
         $behavior->setSourceSensor(null);
+    }
+    /**
+     * @return ArrayCollection
+     */
+    public function getScheduledBehaviors()
+    {
+        return $this->scheduledBehaviors;
+    }
+
+    /**
+     * @param ArrayCollection $scheduledBehaviors
+     */
+    public function setScheduledBehaviors(ArrayCollection $scheduledBehaviors)
+    {
+        $this->scheduledBehaviors = $scheduledBehaviors;
+    }
+
+    /**
+     * @param ScheduledBehavior $scheduledBehavior
+     *
+     * @return Sensor
+     */
+    public function addScheduledBehavior(ScheduledBehavior $scheduledBehavior)
+    {
+        if (!$this->scheduledBehaviors->contains($scheduledBehavior)) {
+            return $this;
+        }
+        $this->scheduledBehaviors[] = $scheduledBehavior;
+        $scheduledBehavior->setSensor($this);
+
+        return $this;
+    }
+
+    /**
+     * @param ScheduledBehavior $scheduledBehavior
+     */
+    public function removeScheduledBehavior(ScheduledBehavior $scheduledBehavior)
+    {
+        $this->scheduledBehaviors->removeElement($scheduledBehavior);
+        $scheduledBehavior->setSensor(null);
     }
 
     /**
