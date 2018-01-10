@@ -16,6 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     })
  * @ORM\Entity(repositoryClass="App\Repository\BehaviorRepository")
  * @ORM\Table(name="imp_behavior")
+ * @ORM\HasLifecycleCallbacks()
  */
 class Behavior
 {
@@ -24,7 +25,7 @@ class Behavior
     /**
      * @var Sensor
      *
-     * @ORM\ManyToOne(targetEntity="Sensor", inversedBy="behaviors")
+     * @ORM\ManyToOne(targetEntity="Sensor", inversedBy="behaviors", cascade={"persist", "refresh"})
      * @ORM\JoinColumn(name="source_sensor_id", referencedColumnName="id", nullable=false)
      * @Groups({"behavior"})
      */
@@ -49,7 +50,7 @@ class Behavior
     /**
      * @var Sensor
      *
-     * @ORM\ManyToOne(targetEntity="Sensor", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="Sensor", cascade={"persist", "refresh"})
      * @ORM\JoinColumn(name="dependent_sensor_id", referencedColumnName="id", nullable=false)
      * @Groups({"behavior"})
      */
@@ -80,11 +81,11 @@ class Behavior
     }
 
     /**
-     * @param $sourceSensor
+     * @param Sensor $sourceSensor
      *
      * @return Behavior
      */
-    public function setSourceSensor($sourceSensor): Behavior
+    public function setSourceSensor(Sensor $sourceSensor = null)
     {
         $this->sourceSensor = $sourceSensor;
 

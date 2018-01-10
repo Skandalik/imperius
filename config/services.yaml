@@ -53,4 +53,4 @@ services:
 
     App\Util\BehaviorApplet\Checker\BehaviorChecker:
         tags:
-            - { name: kernel.event_listener, event: sensor.update, method: listenOnSensorUpdate }
+            - { name: kernel.event_listener, event: sensor.check, method: checkSensor }

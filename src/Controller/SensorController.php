@@ -47,13 +47,8 @@ class SensorController extends GenericController
         /** @var Sensor $sensor */
         $sensor = $this->getRepository()->find($id);
         $uuid = $sensor->getUuid();
-
         $topic = $topicGenerator->generate($uuid, ['status', 'set']);
-
         $mosquittoPublisher->publish($topic, $status);
-
-        $event = new SensorUpdateEvent($uuid, $status);
-        $dispatcher->dispatch(SensorUpdateEvent::NAME, $event);
 
         return $this->serializeObject($sensor);
     }
@@ -85,13 +80,8 @@ class SensorController extends GenericController
         /** @var Sensor $sensor */
         $sensor = $this->getRepository()->find($id);
         $uuid = $sensor->getUuid();
-
         $topic = $topicGenerator->generate($uuid, ['status', 'set']);
-
         $mosquittoPublisher->publish($topic, strval(SensorStateEnumType::getFlippedValue($status)));
-
-        $event = new SensorUpdateEvent($uuid, $status);
-        $dispatcher->dispatch(SensorUpdateEvent::NAME, $event);
 
         return $this->serializeObject($sensor);
     }
@@ -119,6 +109,7 @@ class SensorController extends GenericController
     ) {
         /** @var Sensor $sensor */
         $sensor = $this->getRepository()->find($id);
+        $arr = $sensor->getBehaviors();
         $uuid = $sensor->getUuid();
         $checkStatusTopic = $topicGenerator->generate($uuid, ['status', 'check']);
         $mosquittoPublisher->publish($checkStatusTopic);

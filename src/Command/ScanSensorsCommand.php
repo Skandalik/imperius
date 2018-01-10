@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Command\Factory\SensorValueRangeFactory;
 use App\Command\ValueObject\SensorValueRangeValueObject;
+use App\Event\SensorCheckEvent;
 use App\Event\SensorDisconnectEvent;
 use App\Event\SensorFoundEvent;
 use App\Event\SensorUpdateEvent;
@@ -73,7 +74,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
             function ($rc) use ($output, $client) {
                 $output->writeln('Disconnected. Failure with code: ' . $rc);
                 $output->writeln('Connecting again.');
-                $this->connectMqttClient($client);
+                //$this->connectMqttClient($client);
             }
         );
 
@@ -109,12 +110,12 @@ class ScanSensorsCommand extends ContainerAwareCommand
                         break;
                     case 'update':
                         $output->writeln("Sensor Update Event: Set Status: " . $jsonMessage['status']);
-                        $event = new SensorUpdateEvent(
+                        $event = new SensorCheckEvent(
                             $jsonMessage['uuid'],
                             strval($jsonMessage['status'])
                         );
 
-                        $name = SensorUpdateEvent::NAME;
+                        $name = SensorCheckEvent::NAME;
                         break;
                     case 'disconnect':
                         $output->writeln("Sensor has disconnected unexpedectly. Received last will message.");
@@ -123,7 +124,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
                         $name = SensorDisconnectEvent::NAME;
                         break;
                     default:
-                        $event = new SensorUpdateEvent(
+                        $event = new SensorCheckEvent(
                             $jsonMessage['uuid'],
                             $jsonMessage['ble']
                         );

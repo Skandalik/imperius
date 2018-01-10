@@ -28,8 +28,8 @@ class SensorUpdateListener
     {
         /** @var Sensor $sensor */
         $sensor = $this->sensorRepository->findByUuid($event->getUuid());
-
-        $this->setStatusOrState($sensor, $event);
+        $data = (int) $event->getData();
+        $this->setStatusOrState($sensor, $data);
 
         $this->entityManager->persist($sensor);
         $this->entityManager->flush();
@@ -37,12 +37,12 @@ class SensorUpdateListener
         return;
     }
 
-    private function setStatusOrState(Sensor $sensor, SensorUpdateEvent $event)
+    private function setStatusOrState(Sensor $sensor, $data)
     {
-        if ($event->getData() === SensorStateEnumType::SENSOR_ON || $event->getData() === SensorStateEnumType::SENSOR_OFF) {
-            return $sensor->setActive(boolval(SensorStateEnumType::getFlippedValue($event->getData())));
+        if (!$sensor->isFetchable()) {
+            $sensor->setActive(!($data === 0));
         }
-        return $sensor->setStatus((int)$event->getData());
+        return $sensor->setStatus($data);
     }
 
 }

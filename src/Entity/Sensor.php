@@ -10,6 +10,7 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
  * @ApiResource(
@@ -43,7 +44,7 @@ class Sensor
     private $uuid;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom")
+     * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom", cascade={"persist", "refresh"})
      * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=true)
      *
      * @Groups({"sensor", "behavior"})
@@ -137,7 +138,7 @@ class Sensor
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="Behavior", mappedBy="sourceSensor", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="Behavior", mappedBy="sourceSensor", orphanRemoval=true, cascade={"persist", "refresh"})
      * @Groups({"sensor"})
      * @ApiSubresource()
      */
@@ -472,11 +473,18 @@ class Sensor
 
     /**
      * @param Behavior $behavior
+     *
+     * @return Sensor
      */
     public function addBehavior(Behavior $behavior)
     {
+        if (!$this->behaviors->contains($behavior)) {
+            return $this;
+        }
+        $this->behaviors[] = $behavior;
         $behavior->setSourceSensor($this);
-        $this->behaviors->add($behavior);
+
+        return $this;
     }
 
     /**
@@ -484,8 +492,18 @@ class Sensor
      */
     public function removeBehavior(Behavior $behavior)
     {
-        $behavior->setSourceSensor(null);
         $this->behaviors->removeElement($behavior);
+        $behavior->setSourceSensor(null);
+    }
+
+    /**
+     * @return $this
+     */
+    public function updateTimestamp()
+    {
+        $this->setUpdatedAt(new DateTime());
+
+        return $this;
     }
 
     public function __toString()

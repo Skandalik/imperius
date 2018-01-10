@@ -34,7 +34,7 @@ class Room
     /**
      * @var Collection
      *
-     * @ORM\OneToMany(targetEntity="Sensor", mappedBy="room")
+     * @ORM\OneToMany(targetEntity="Sensor", mappedBy="room", cascade={"persist", "refresh"})
      */
     private $sensorsInRoom;
 

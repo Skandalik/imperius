@@ -24,7 +24,7 @@ class SensorConditionsEnumType extends AbstractEnumType
 
     protected static $choices = [
         self::IS_OFF              => 'active === 0',
-        self::IS_ON               => 'active === 0',
+        self::IS_ON               => 'active === 1',
         self::EQUALS              => 'status ===',
         self::NOT_EQUALS          => 'status !==',
         self::BIGGER_THAN         => 'status >',

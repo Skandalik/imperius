@@ -3,9 +3,12 @@ declare(strict_types=1);
 namespace App\Util\BehaviorApplet\Checker;
 
 use App\Entity\Behavior;
+use App\Entity\Room;
 use App\Entity\Sensor;
+use App\Event\SensorCheckEvent;
 use App\Event\SensorUpdateEvent;
 use App\Repository\BehaviorRepository;
+use App\Repository\RoomRepository;
 use App\Repository\SensorRepository;
 use App\Type\SensorActionsEnumType;
 use App\Type\SensorConditionsEnumType;
@@ -50,6 +53,9 @@ class BehaviorChecker
      */
     private $behaviorDataObjectFactory;
 
+    /** @var RoomRepository */
+    private $roomRepo;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         PropertyAccessorInterface $propertyAccessor,
@@ -59,8 +65,6 @@ class BehaviorChecker
         BehaviorDataObjectFactory $behaviorDataObjectFactory
     ) {
         $this->entityManager = $entityManager;
-        $this->sensorRepository = $entityManager->getRepository(Sensor::class);
-        $this->behaviorRepository = $entityManager->getRepository(Behavior::class);
         $this->propertyAccessor = $propertyAccessor;
         $this->eventDispatcher = $eventDispatcher;
         $this->topicGenerator = $topicGenerator;
@@ -69,14 +73,26 @@ class BehaviorChecker
     }
 
     /**
-     * @param SensorUpdateEvent $event
+     * @param SensorCheckEvent $event
      */
-    public function listenOnSensorUpdate(SensorUpdateEvent $event)
+    public function checkSensor(SensorCheckEvent $event)
     {
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+        $this->sensorRepository = $this->entityManager->getRepository(Sensor::class);
+        $this->behaviorRepository = $this->entityManager->getRepository(Behavior::class);
+
         /** @var Sensor $sensor */
         $sensor = $this->sensorRepository->findByUuid($event->getUuid());
 
-        if (empty($sensor->getBehaviors()->getValues())) {
+        $updateEvent = new SensorUpdateEvent($event->getUuid(), $event->getData());
+        $this->eventDispatcher->dispatch(SensorUpdateEvent::NAME, $updateEvent);
+
+        if (empty($sensor->getBehaviors())) {
+            echo  PHP_EOL;
+            echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" . PHP_EOL;
+            echo "No behaviors for sensor " . $sensor->getName() . PHP_EOL. PHP_EOL;
+            echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"  . PHP_EOL. PHP_EOL;
             return;
         }
 
@@ -119,7 +135,7 @@ class BehaviorChecker
         )) {
             echo "Behavior requirements didn't match for sensor " . $behavior->getSourceSensor()->getName() . PHP_EOL;
             echo "Condition: " . $conditionBehavior->getProperty() . " " . $conditionBehavior->getExpression() . " " . $conditionBehavior ->getArgument() . PHP_EOL;
-            echo "Action: " . $conditionBehavior->getProperty() . " " . $conditionBehavior->getExpression() . " " . $conditionBehavior ->getArgument() . PHP_EOL;
+            echo "Action: " . $actionBehavior->getProperty() . " " . $actionBehavior->getExpression() . " " . $actionBehavior ->getArgument() . PHP_EOL;
             echo "On sensor " . $behavior->getDependentSensor()->getName() . PHP_EOL;
             echo  PHP_EOL;
 
@@ -132,12 +148,14 @@ class BehaviorChecker
         echo "On sensor " . $behavior->getDependentSensor()->getName() . PHP_EOL;
         //TODO te trzy metody są używane też w SensorController. Może zrobić to lepiej?
         $uuid = $behavior->getDependentSensor()->getUuid();
+
         $topic = $this->topicGenerator->generate($uuid, ['status', 'set']);
         $this->mosquittoPublisher->publish($topic, $actionBehavior->getArgument());
-        $event = new SensorUpdateEvent($uuid, $actionBehavior->getArgument());
-        $this->eventDispatcher->dispatch(SensorUpdateEvent::NAME, $event);
         echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" . PHP_EOL;
         echo  PHP_EOL;
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+        return;
     }
 
     private function checkStatementWithEval(string $statement)
