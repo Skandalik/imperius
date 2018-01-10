@@ -10,7 +10,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource(attributes={"normalization_context"={"groups"={"room"}}})
+ * @ApiResource(
+ *     attributes={
+ *     "normalization_context"={"groups"={"room"}},
+ *     "denormalization_context"={"groups"={"sensor"}},
+ *     })
  * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="App\Repository\RoomRepository")
  * @ORM\Table(name="imp_room")

@@ -11,6 +11,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ApiResource(
  *     attributes={
  *      "normalization_context"={"groups"={"behavior"}},
+ *      "denormalization_context"={"groups"={"behavior"}},
  *      "force_eager"=false
  *     })
  * @ORM\Entity(repositoryClass="App\Repository\BehaviorRepository")
@@ -141,9 +142,9 @@ class Behavior
     }
 
     /**
-     * @return int
+     * @return null | int
      */
-    public function getSourceArgument(): int
+    public function getSourceArgument()
     {
         return $this->sourceArgument;
     }
@@ -181,9 +182,9 @@ class Behavior
     }
 
     /**
-     * @return int
+     * @return null | int
      */
-    public function getActionArgument(): int
+    public function getActionArgument()
     {
         return $this->actionArgument;
     }
@@ -199,6 +200,5 @@ class Behavior
 
         return $this;
     }
-
 
 }

@@ -5,6 +5,8 @@ services:
         build: ./docker/php-cli
         networks:
             - imperius
+        ports:
+          - 8180:80
         volumes_from:
             - code
         depends_on:

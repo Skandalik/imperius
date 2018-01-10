@@ -6,104 +6,65 @@ use function array_flip;
 use function array_keys;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\PostgreSqlPlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Types\Type;
 
 abstract class AbstractEnumType extends Type
 {
-    /** @var array */
-    protected static $choices;
-
-    /** @var string */
     protected $name;
+    protected static $choices = [];
 
-    /**
-     * @return array
-     */
-    public static function getChoices(): array
-    {
-        return array_flip(static::$choices);
-    }
-
-    /**
-     * @return array
-     */
-    public static function getUnflippedChoices(): array
-    {
-        return static::$choices;
-    }
-
-    /**
-     * @return array
-     */
-    protected static function getValues(): array
+    public static function getChoices()
     {
         return array_keys(static::$choices);
     }
 
-    /**
-     * @param array            $fieldDeclaration
-     * @param AbstractPlatform $platform
-     *
-     * @return string
-     */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    public static function getValues()
     {
-        $values = implode(
-            ', ',
-            array_map(
-                function ($value) {
-                    return "'{$value}'";
-                },
-                static::getValues()
-            )
-        );
-        if ($platform instanceof PostgreSqlPlatform || $platform instanceof SQLServerPlatform) {
-            return sprintf('VARCHAR(255) CHECK(%s IN (%s))', $fieldDeclaration['name'], $values);
-        }
-
-        return sprintf('ENUM(%s)', $values);
+        return array_flip(static::$choices);
     }
 
-    /**
-     * @param mixed            $value
-     * @param AbstractPlatform $platform
-     *
-     * @return mixed
-     */
+    public static function getReadableValues()
+    {
+        return static::$choices;
+    }
+
+    public static function getFlippedValue($value)
+    {
+        return static::getValues()[$value];
+    }
+
+    public static function getValue($value)
+    {
+        return static::getReadableValues()[$value];
+    }
+
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    {
+        $values = array_map(function($val) { return "'".$val."'"; }, static::getChoices());
+
+        return "ENUM(".implode(", ", $values).")";
+    }
+
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         return $value;
     }
 
-    /**
-     * @param mixed            $value
-     * @param AbstractPlatform $platform
-     *
-     * @return mixed
-     */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-        if (!in_array($value, self::getValues())) {
-            throw new \InvalidArgumentException("Invalid '" . $this->name . "' value.");
+        if (!in_array($value, static::getChoices())) {
+            throw new \InvalidArgumentException("Invalid '".$this->name."' value.");
         }
-
         return $value;
     }
 
-    /**
-     * @return string
-     */
     public function getName()
     {
         return $this->name;
     }
 
-    /**
-     * @param AbstractPlatform $platform
-     *
-     * @return bool
-     */
     public function requiresSQLCommentHint(AbstractPlatform $platform)
     {
         return true;

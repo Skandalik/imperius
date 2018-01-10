@@ -18,11 +18,25 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ScanSensorsCommand extends ContainerAwareCommand
 {
+    const MQTT_BROKER = '192.168.1.102';
+    const MQTT_BROKER_PORT = 1883;
+    const MQTT_BROKER_KEEP_ALIVE = 30;
+    const CLIENT_ID = 'imperius-sensor-scan-command';
+
     /** @var  EventDispatcher */
     private $eventDispatcher;
 
     /** @var SensorValueRangeFactory */
     private $sensorValueRangeFactory;
+
+    /** @var array */
+    private $topics = [
+        TopicEnum::SENSOR_REGISTER        => 1,
+        TopicEnum::SENSOR_STATUS_RESPONSE => 1,
+        TopicEnum::SENSOR_RESPONSE        => 1,
+        TopicEnum::SENSOR_LAST_WILL       => 1,
+        'exit'                            => 1,
+    ];
 
     protected function configure()
     {
@@ -42,21 +56,45 @@ class ScanSensorsCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         //TODO popraw tworzenie klienta
-        $client = new Client();
+        $client = new Client(self::CLIENT_ID);
 
-        $output->writeln("Scanning...");
+        $output->writeln("");
+        $output->writeln("");
+        $output->writeln("=================================");
+        $output->writeln("Imperius Home Automation Project");
+        $output->writeln("=================================");
+        $output->writeln("");
+        $output->writeln("Starting command to scan for nearby sensors in your house!");
+        $output->writeln("It will listen for every change that your sensor will do.");
+        $output->writeln("");
+        $output->writeln("");
+
+        $client->onDisconnect(
+            function ($rc) use ($output, $client) {
+                $output->writeln('Disconnected. Failure with code: ' . $rc);
+                $output->writeln('Connecting again.');
+                $this->connectMqttClient($client);
+            }
+        );
+
+        $client->onConnect(
+            function () use ($output) {
+                $output->writeln('Connected to MQTT Broker.');
+            }
+        );
 
         /** @var Message $message */
         $client->onMessage(
             function ($message) use ($output) {
                 $jsonMessage = json_decode($message->payload, true);
-                $output->writeln("Status: " . $jsonMessage['status']);
                 if (is_string($jsonMessage['status'])) {
                     $tempStatus = (float) $jsonMessage['status'];
                     $jsonMessage['status'] = (int) round($tempStatus);
                 }
                 switch ($jsonMessage['action']) {
                     case 'register':
+                        $output->writeln("");
+                        $output->writeln("Found new sensor!");
                         $event = new SensorFoundEvent(
                             $jsonMessage['uuid'],
                             $jsonMessage['ip'],
@@ -70,6 +108,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
                         $name = SensorFoundEvent::NAME;
                         break;
                     case 'update':
+                        $output->writeln("Sensor Update Event: Set Status: " . $jsonMessage['status']);
                         $event = new SensorUpdateEvent(
                             $jsonMessage['uuid'],
                             strval($jsonMessage['status'])
@@ -78,7 +117,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
                         $name = SensorUpdateEvent::NAME;
                         break;
                     case 'disconnect':
-                        echo "last will";
+                        $output->writeln("Sensor has disconnected unexpedectly. Received last will message.");
                         $event = new SensorDisconnectEvent($jsonMessage['uuid']);
 
                         $name = SensorDisconnectEvent::NAME;
@@ -91,23 +130,35 @@ class ScanSensorsCommand extends ContainerAwareCommand
                         break;
                 }
                 $this->eventDispatcher->dispatch($name, $event);
+                $output->writeln("");
+                $output->writeln("");
             }
         );
 
-        $output->writeln("Connecting.");
-        $client->connect('192.168.65.1');
-        $output->writeln("Connected. Publishing...");
+        $output->writeln("Connecting to an MQTT Broker on port " . self::MQTT_BROKER_PORT . '.');
+        $output->writeln("IP of MQTT Broker " . self::MQTT_BROKER . '.');
+        $output->writeln("Keep Alive responding for this command client: " . self::MQTT_BROKER_KEEP_ALIVE . '.');
+        $output->writeln("");
 
-        $client->publish('command', '', 1, false);
+        $this->connectMqttClient($client);
 
-        $client->subscribe(TopicEnum::SENSOR_REGISTER, 1);
-        $client->subscribe(TopicEnum::SENSOR_STATUS_RESPONSE, 1);
-        $client->subscribe(TopicEnum::SENSOR_RESPONSE, 1);
-        $client->subscribe(TopicEnum::SENSOR_LAST_WILL, 1);
-        $client->subscribe('exit', 1);
+        $output->writeln("Subscribing to topics:");
+
+        foreach ($this->topics as $topic => $qos) {
+            $output->writeln("- " . $topic);
+            $client->subscribe($topic, $qos);
+        }
 
         $client->loopForever();
         $output->writeln('Exiting gracefully...');
+    }
+
+    /**
+     * @param Client $client
+     */
+    protected function connectMqttClient($client): void
+    {
+        $client->connect(self::MQTT_BROKER, self::MQTT_BROKER_PORT, self::MQTT_BROKER_KEEP_ALIVE);
     }
 
     /**

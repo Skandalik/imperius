@@ -47,7 +47,7 @@ class SensorFoundListener
         $sensor->setFetchable($event->isFetchable());
         $sensor->setSwitchable($event->isSwitchable());
         $sensor->setAdjustable($event->isAdjustable());
-        $sensor->setState(SensorStateEnumType::SENSOR_ACTIVE);
+        $sensor->setActive(true);
         $sensor->setStatus($event->getStatus());
 
         if ($event->isAdjustable()) {

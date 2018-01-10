@@ -5,10 +5,12 @@ namespace App\Controller;
 use App\Entity\Sensor;
 use App\Event\SensorUpdateEvent;
 use App\Form\SensorType;
+use App\Type\SensorStateEnumType;
 use App\Util\MosquittoWrapper\MosquittoPublisher;
 use App\Util\TopicGenerator\TopicGenerator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use function strval;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -49,6 +51,44 @@ class SensorController extends GenericController
         $topic = $topicGenerator->generate($uuid, ['status', 'set']);
 
         $mosquittoPublisher->publish($topic, $status);
+
+        $event = new SensorUpdateEvent($uuid, $status);
+        $dispatcher->dispatch(SensorUpdateEvent::NAME, $event);
+
+        return $this->serializeObject($sensor);
+    }
+
+    /**
+     * @Route(
+     *     name="set_state",
+     *     path="/api/sensors/{id}/set/{status}",
+     *     defaults={
+     *          "_api_item_operation_name"="set_state"
+     *     }
+     * )
+     * @Method("PUT")
+     * @param MosquittoPublisher       $mosquittoPublisher
+     * @param EventDispatcherInterface $dispatcher
+     * @param TopicGenerator           $topicGenerator
+     * @param                          $id
+     * @param                          $status
+     *
+     * @return Response
+     */
+    public function setStateAction(
+        MosquittoPublisher $mosquittoPublisher,
+        EventDispatcherInterface $dispatcher,
+        TopicGenerator $topicGenerator,
+        $id,
+        $status
+    ) {
+        /** @var Sensor $sensor */
+        $sensor = $this->getRepository()->find($id);
+        $uuid = $sensor->getUuid();
+
+        $topic = $topicGenerator->generate($uuid, ['status', 'set']);
+
+        $mosquittoPublisher->publish($topic, strval(SensorStateEnumType::getFlippedValue($status)));
 
         $event = new SensorUpdateEvent($uuid, $status);
         $dispatcher->dispatch(SensorUpdateEvent::NAME, $event);

@@ -7,10 +7,17 @@ use App\Entity\Sensor;
 use App\Event\SensorUpdateEvent;
 use App\Repository\BehaviorRepository;
 use App\Repository\SensorRepository;
+use App\Type\SensorActionsEnumType;
+use App\Type\SensorConditionsEnumType;
+use App\Util\BehaviorApplet\DataObject\BehaviorDataObject;
 use App\Util\BehaviorApplet\Enum\BehaviorPredicatesEnum;
+use App\Util\BehaviorApplet\Factory\BehaviorDataObjectFactory;
 use App\Util\MosquittoWrapper\MosquittoPublisher;
 use App\Util\TopicGenerator\TopicGenerator;
+use function count;
 use Doctrine\ORM\EntityManagerInterface;
+use function explode;
+use const PHP_EOL;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use function intval;
@@ -38,12 +45,18 @@ class BehaviorChecker
     /** @var MosquittoPublisher */
     private $mosquittoPublisher;
 
+    /**
+     * @var BehaviorDataObjectFactory
+     */
+    private $behaviorDataObjectFactory;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         PropertyAccessorInterface $propertyAccessor,
         EventDispatcherInterface $eventDispatcher,
         TopicGenerator $topicGenerator,
-        MosquittoPublisher $mosquittoPublisher
+        MosquittoPublisher $mosquittoPublisher,
+        BehaviorDataObjectFactory $behaviorDataObjectFactory
     ) {
         $this->entityManager = $entityManager;
         $this->sensorRepository = $entityManager->getRepository(Sensor::class);
@@ -52,6 +65,7 @@ class BehaviorChecker
         $this->eventDispatcher = $eventDispatcher;
         $this->topicGenerator = $topicGenerator;
         $this->mosquittoPublisher = $mosquittoPublisher;
+        $this->behaviorDataObjectFactory = $behaviorDataObjectFactory;
     }
 
     /**
@@ -66,7 +80,9 @@ class BehaviorChecker
             return;
         }
 
-        echo "Checking behavior";
+        echo  PHP_EOL;
+        echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" . PHP_EOL;
+        echo "Checking behavior for sensor " . $sensor->getName() . PHP_EOL. PHP_EOL;
         $this->handleBehavior($sensor);
     }
 
@@ -80,50 +96,52 @@ class BehaviorChecker
 
     private function checkCondition(Sensor $sensor, Behavior $behavior)
     {
-        $sourceValue = $this->getPropertyValue($sensor, $behavior->getSourceProperty());
-        $dependentValue = $this->getPropertyValue($behavior->getDependentSensor(), $behavior->getSourceProperty());
-        $predicate = $behavior->getPredicate();
-        $argument = intval($behavior->getPredicateArgument());
+        $conditions = explode(' ', SensorConditionsEnumType::getValue($behavior->getSourceCondition()));
+        $actions = explode(' ', SensorActionsEnumType::getValue($behavior->getDependentAction()));
 
-        $enum = BehaviorPredicatesEnum::findEnum($predicate);
+        if (count($conditions) === 2) {
+            $conditions[] = $behavior->getSourceArgument();
+        }
+        if (count($actions) === 2) {
+            $actions[] = $behavior->getActionArgument();
+        }
 
-        if (!$this->checkStatementWithEval($this->convertToInt($sourceValue) . ' ' . BehaviorPredicatesEnum::findEnum($predicate) . ' ' . $argument)) {
-            echo "Behavior requirements didn't match.";
+        $conditionBehavior = $this->behaviorDataObjectFactory->create($conditions);
+        $actionBehavior = $this->behaviorDataObjectFactory->create($actions);
+
+        $propertyData = $this->propertyAccessor->getValue(
+            $behavior->getSourceSensor(),
+            $conditionBehavior->getProperty()
+        );
+
+        if (!$this->checkStatementWithEval(
+            intval($propertyData) . ' ' . $conditionBehavior->getExpression() . ' ' . $conditionBehavior->getArgument()
+        )) {
+            echo "Behavior requirements didn't match for sensor " . $behavior->getSourceSensor()->getName() . PHP_EOL;
+            echo "Condition: " . $conditionBehavior->getProperty() . " " . $conditionBehavior->getExpression() . " " . $conditionBehavior ->getArgument() . PHP_EOL;
+            echo "Action: " . $conditionBehavior->getProperty() . " " . $conditionBehavior->getExpression() . " " . $conditionBehavior ->getArgument() . PHP_EOL;
+            echo "On sensor " . $behavior->getDependentSensor()->getName() . PHP_EOL;
+            echo  PHP_EOL;
+
             return;
         }
 
-        echo "Behavior requirements matched. Setting another sensor.";
+        echo "Behavior requirements matched for sensor " . $behavior->getSourceSensor()->getName() . PHP_EOL;
+        echo "Condition: " . $conditionBehavior->getProperty() . " " . $conditionBehavior->getExpression() . " " . $conditionBehavior ->getArgument() . PHP_EOL;
+        echo "Action: " . $actionBehavior->getProperty() . " " . $actionBehavior->getExpression() . " " . $actionBehavior ->getArgument() . PHP_EOL;
+        echo "On sensor " . $behavior->getDependentSensor()->getName() . PHP_EOL;
         //TODO te trzy metody są używane też w SensorController. Może zrobić to lepiej?
         $uuid = $behavior->getDependentSensor()->getUuid();
         $topic = $this->topicGenerator->generate($uuid, ['status', 'set']);
-        $this->mosquittoPublisher->publish($topic, $behavior->getActionArgument());
-        $event = new SensorUpdateEvent($uuid, $behavior->getActionArgument());
+        $this->mosquittoPublisher->publish($topic, $actionBehavior->getArgument());
+        $event = new SensorUpdateEvent($uuid, $actionBehavior->getArgument());
         $this->eventDispatcher->dispatch(SensorUpdateEvent::NAME, $event);
+        echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" . PHP_EOL;
+        echo  PHP_EOL;
     }
 
     private function checkStatementWithEval(string $statement)
     {
         return eval('return ' . $statement . ';');
-    }
-
-    /**
-     * @param Sensor $sensor
-     * @param string $property
-     *
-     * @return mixed
-     */
-    private function getPropertyValue(Sensor $sensor, string $property)
-    {
-        return $this->propertyAccessor->getValue($sensor, $property);
-    }
-
-    /**
-     * @param $value
-     *
-     * @return bool|int
-     */
-    private function convertToInt($value)
-    {
-        return intval($value);
     }
 }

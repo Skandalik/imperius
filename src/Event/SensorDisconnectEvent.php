@@ -22,7 +22,7 @@ class SensorDisconnectEvent extends Event
     public function __construct(string $uuid)
     {
         $this->uuid = $uuid;
-        $this->state = SensorStateEnumType::SENSOR_INACTIVE;
+        $this->state = false;
     }
 
     /**

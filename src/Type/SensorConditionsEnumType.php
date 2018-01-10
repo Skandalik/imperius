@@ -23,8 +23,8 @@ class SensorConditionsEnumType extends AbstractEnumType
     const SMALLER_EQUALS_THAN = 'smaller_equals_than';
 
     protected static $choices = [
-        self::IS_OFF              => 'state === ' . SensorStateEnumType::SENSOR_INACTIVE,
-        self::IS_ON               => 'state === ' . SensorStateEnumType::SENSOR_ACTIVE,
+        self::IS_OFF              => 'active === 0',
+        self::IS_ON               => 'active === 0',
         self::EQUALS              => 'status ===',
         self::NOT_EQUALS          => 'status !==',
         self::BIGGER_THAN         => 'status >',

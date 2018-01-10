@@ -15,6 +15,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ApiResource(
  *     attributes={
  *      "normalization_context"={"groups"={"sensor"}},
+ *      "denormalization_context"={"groups"={"sensor", "behavior"}},
  *      "force_eager"=false
  *     })
  * @ORM\Entity(repositoryClass="App\Repository\SensorRepository")
@@ -98,12 +99,12 @@ class Sensor
     private $status;
 
     /**
-     * @var string
+     * @var bool
      *
-     * @ORM\Column(name="state", type="sensor_state", nullable=false)
+     * @ORM\Column(name="active", type="boolean", nullable=false)
      * @Groups({"sensor"})
      */
-    private $state;
+    private $active;
 
     /**
      * @var string
@@ -136,7 +137,7 @@ class Sensor
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="Behavior", mappedBy="sourceSensor", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Behavior", mappedBy="sourceSensor", cascade={"persist"})
      * @Groups({"sensor"})
      * @ApiSubresource()
      */
@@ -153,7 +154,7 @@ class Sensor
             ->setFetchable(false)
             ->setSwitchable(false)
             ->setAdjustable(false)
-            ->setState(SensorStateEnumType::SENSOR_INACTIVE)
+            ->setActive(false)
             ->setSensorIp("")
             ->setCreatedAt(null)
         ;
@@ -434,21 +435,21 @@ class Sensor
     }
 
     /**
-     * @return string
+     * @return bool
      */
-    public function getState(): string
+    public function getActive(): bool
     {
-        return $this->state;
+        return $this->active;
     }
 
     /**
-     * @param $state
+     * @param bool $active
      *
      * @return Sensor
      */
-    public function setState($state): Sensor
+    public function setActive(bool $active): Sensor
     {
-        $this->state = $state;
+        $this->active = $active;
 
         return $this;
     }
@@ -485,5 +486,10 @@ class Sensor
     {
         $behavior->setSourceSensor(null);
         $this->behaviors->removeElement($behavior);
+    }
+
+    public function __toString()
+    {
+        return $this->getUuid();
     }
 }

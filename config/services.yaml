@@ -31,10 +31,6 @@ services:
         arguments:
             - '%env(MOSQUITTO_BROKER_HOST)%'
 
-    App\Command\Repository\SensorApiRedisRepository:
-        arguments:
-            - "@snc_redis.sensor_api"
-
     App\Listener\SensorFoundListener:
         tags:
             - { name: kernel.event_listener, event: sensor.found }

@@ -5,7 +5,10 @@ namespace App\Listener;
 use App\Entity\Sensor;
 use App\Event\SensorUpdateEvent;
 use App\Repository\SensorRepository;
+use App\Type\SensorStateEnumType;
+use function boolval;
 use Doctrine\ORM\EntityManagerInterface;
+use function in_array;
 
 class SensorUpdateListener
 {
@@ -26,12 +29,20 @@ class SensorUpdateListener
         /** @var Sensor $sensor */
         $sensor = $this->sensorRepository->findByUuid($event->getUuid());
 
-        $sensor->setStatus((int)$event->getData());
+        $this->setStatusOrState($sensor, $event);
 
         $this->entityManager->persist($sensor);
         $this->entityManager->flush();
 
         return;
+    }
+
+    private function setStatusOrState(Sensor $sensor, SensorUpdateEvent $event)
+    {
+        if ($event->getData() === SensorStateEnumType::SENSOR_ON || $event->getData() === SensorStateEnumType::SENSOR_OFF) {
+            return $sensor->setActive(boolval(SensorStateEnumType::getFlippedValue($event->getData())));
+        }
+        return $sensor->setStatus((int)$event->getData());
     }
 
 }

@@ -13,8 +13,8 @@ class SensorActionsEnumType extends AbstractEnumType
     const SET = 'set';
 
     protected static $choices = [
-        self::TURN_OFF => 'state = ' . SensorStateEnumType::SENSOR_INACTIVE,
-        self::TURN_ON  => 'state = ' . SensorStateEnumType::SENSOR_ACTIVE,
+        self::TURN_OFF => 'active = off',
+        self::TURN_ON  => 'active = on',
         self::SET      => 'status =',
     ];
 
