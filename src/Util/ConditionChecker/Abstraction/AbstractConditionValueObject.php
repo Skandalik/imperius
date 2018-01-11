@@ -1,26 +1,17 @@
 <?php
 declare(strict_types=1);
-namespace App\Util\BehaviorApplet\DataObject;
+namespace App\Util\ConditionChecker\Abstraction;
 
-use function intval;
-
-class BehaviorDataObject
+class AbstractConditionValueObject
 {
     /** @var string */
-    private $property;
+    protected $property;
 
     /** @var string */
-    private $expression;
+    protected $expression;
 
     /** @var string */
-    private $argument;
-
-    public function __construct(array $behavior)
-    {
-        $this->property = $behavior[0];
-        $this->expression = $behavior[1];
-        $this->argument = strval($behavior[2]);
-    }
+    protected $argument;
 
     /**
      * @return string
@@ -44,5 +35,10 @@ class BehaviorDataObject
     public function getArgument(): string
     {
         return $this->argument;
+    }
+
+    public function getStatement(string $propertyData)
+    {
+        return sprintf("%s %s %s", $propertyData, $this->expression, $this->argument);
     }
 }

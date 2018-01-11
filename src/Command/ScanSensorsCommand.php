@@ -19,7 +19,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ScanSensorsCommand extends ContainerAwareCommand
 {
-    const MQTT_BROKER = '192.168.1.102';
+    const MQTT_BROKER = 'docker.for.mac.localhost';
     const MQTT_BROKER_PORT = 1883;
     const MQTT_BROKER_KEEP_ALIVE = 30;
     const CLIENT_ID = 'imperius-sensor-scan-command';

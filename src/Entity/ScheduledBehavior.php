@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Entity\Traits\IdentityAutoTrait;
+use App\Util\DateSupplier\DateSupplier;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use function is_null;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -34,7 +36,8 @@ class ScheduledBehavior
     /**
      * @var DateTime
      *
-     * @ORM\Column(name="created_at", nullable=false)
+     * @ORM\Column(name="created_at", type="datetime")
+     * @Groups({"schedule"})
      */
     private $createdAt;
 
@@ -42,6 +45,7 @@ class ScheduledBehavior
      * @var DateTime
      *
      * @ORM\Column(name="updated_at", type="datetime", nullable=true)
+     * @Groups({"schedule"})
      */
     private $updatedAt;
 
@@ -49,6 +53,7 @@ class ScheduledBehavior
      * @var DateTime
      *
      * @ORM\Column(name="last_run_at", type="datetime", nullable=true)
+     * @Groups({"schedule"})
      */
     private $lastRunAt;
 
@@ -56,6 +61,7 @@ class ScheduledBehavior
      * @var DateTime
      *
      * @ORM\Column(name="finished_run_at", type="datetime", nullable=true)
+     * @Groups({"schedule"})
      */
     private $finishedRunAt;
 
@@ -63,22 +69,65 @@ class ScheduledBehavior
      * @var DateTime
      *
      * @ORM\Column(name="next_run_at", type="datetime", nullable=true)
+     * @Groups({"schedule"})
      */
     private $nextRunAt;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="relative_date", nullable=false)
+     * @ORM\Column(name="relative_date", type="text", nullable=false)
+     * @Groups({"schedule"})
      */
     private $relativeDate;
 
     /**
      * @var DateTime
      *
-     * @ORM\Column(name="time", type="time", nullable=true)
+     * @ORM\Column(name="time", type="time", nullable=false)
+     * @Groups({"schedule"})
      */
     private $time;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="scheduled_action", type="sensor_actions_enum", nullable=false)
+     * @Groups({"behavior"})
+     */
+    private $scheduledAction;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="scheduled_action_argument", type="integer", nullable=true)
+     * @Groups({"behavior"})
+     */
+    private $scheduledActionArgument;
+
+    /**
+     * @ORM\PrePersist()
+     *
+     * @ORM\PreUpdate()
+     */
+    public function prePersist()
+    {
+        $this->setUpdatedAt(new DateTime());
+
+        if (is_null($this->createdAt)) {
+            $this->setCreatedAt(new DateTime());
+        }
+        $date = new DateSupplier();
+        $this->setNextRunAt($date->convertRelativeDate($this->getRelativeDate(), $this->getTime()));
+    }
+
+    /**
+     * ScheduledBehavior constructor.
+     */
+    public function __construct()
+    {
+        $this->setCreatedAt(new DateTime());
+    }
 
     /**
      * @return Sensor
@@ -181,11 +230,11 @@ class ScheduledBehavior
     }
 
     /**
-     * @return DateTime | null
+     * @return string | null
      */
     public function getNextRunAt()
     {
-        return $this->nextRunAt;
+        return $this->nextRunAt ? date_format($this->nextRunAt, 'Y-m-d H:i') : null;
     }
 
     /**
@@ -221,11 +270,11 @@ class ScheduledBehavior
     }
 
     /**
-     * @return DateTime | null
+     * @return string | null
      */
     public function getTime()
     {
-        return $this->time;
+        return date_format($this->time, 'H:i:s');
     }
 
     /**
@@ -240,5 +289,44 @@ class ScheduledBehavior
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getScheduledAction(): string
+    {
+        return $this->scheduledAction;
+    }
+
+    /**
+     * @param string $scheduledAction
+     *
+     * @return ScheduledBehavior
+     */
+    public function setScheduledAction(string $scheduledAction)
+    {
+        $this->scheduledAction = $scheduledAction;
+
+        return $this;
+    }
+
+    /**
+     * @return null | int
+     */
+    public function getScheduledActionArgument()
+    {
+        return $this->scheduledActionArgument;
+    }
+
+    /**
+     * @param int | null $scheduledActionArgument
+     *
+     * @return ScheduledBehavior
+     */
+    public function setScheduledActionArgument($scheduledActionArgument)
+    {
+        $this->scheduledActionArgument = $scheduledActionArgument;
+
+        return $this;
+    }
 
 }

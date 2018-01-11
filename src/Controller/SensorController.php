@@ -7,6 +7,7 @@ use App\Event\SensorUpdateEvent;
 use App\Form\SensorType;
 use App\Type\SensorStateEnumType;
 use App\Util\MosquittoWrapper\MosquittoPublisher;
+use App\Util\SchedulerApplet\ScheduleExecutor;
 use App\Util\TopicGenerator\TopicGenerator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
