@@ -2,14 +2,13 @@
 declare(strict_types=1);
 namespace App\Util\ConditionChecker;
 
+use App\Entity\ManualBehavior;
 use App\Entity\Sensor;
 use App\Type\SensorConditionsEnumType;
 use App\Util\ConditionChecker\Abstraction\AbstractConditionValueObject;
 use App\Util\ConditionChecker\Factory\ConditionValueObjectFactory;
-use function count;
-use function intval;
-use function strval;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use function strval;
 
 class ConditionChecker
 {
@@ -28,21 +27,21 @@ class ConditionChecker
     }
 
     /**
-     * @param Sensor $sensor
-     * @param string $conditionData
-     * @param string $argument
+     * @param ManualBehavior $behavior
      *
      * @return bool
      */
-    public function checkCondition(Sensor $sensor, string $conditionData, string $argument = ''): bool
+    public function checkCondition(ManualBehavior $behavior): bool
     {
-        $condition = $this->conditionDataObjectFactory->createCondition(
-            explode(' ', SensorConditionsEnumType::getValue($conditionData)),
-            $argument
+        $map = SensorConditionsEnumType::getReadableValues();
+
+        $condition = $this->conditionDataObjectFactory->create(
+            explode(' ', SensorConditionsEnumType::getValue($behavior->getRequirement())),
+            strval($behavior->getRequirementArgument())
         );
 
         return $this->checkStatementWithEval(
-            $condition->getStatement(strval($this->getSensorDataFromProperty($sensor, $condition)))
+            $condition->getStatement(($this->getDataFromProperty($behavior->getSensor(), $condition)))
         );
     }
 
@@ -52,9 +51,9 @@ class ConditionChecker
      *
      * @return mixed
      */
-    private function getSensorDataFromProperty(Sensor $sensor, AbstractConditionValueObject $conditionDataObject)
+    private function getDataFromProperty(Sensor $sensor, AbstractConditionValueObject $conditionDataObject)
     {
-        return intval($this->propertyAccessor->getValue($sensor, $conditionDataObject->getProperty()));
+        return strval((int) $this->propertyAccessor->getValue($sensor, $conditionDataObject->getProperty()));
     }
 
     /**

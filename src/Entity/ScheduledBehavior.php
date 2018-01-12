@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Entity\Behavior\Abstraction\BehaviorInterface;
 use App\Entity\Traits\IdentityAutoTrait;
 use App\Util\DateSupplier\DateSupplier;
 use DateTime;
@@ -13,14 +14,14 @@ use Symfony\Component\Serializer\Annotation\Groups;
 /**
  * @ApiResource(
  *     attributes={
- *      "normalization_context"={"groups"={"schedule"}},
- *      "denormalization_context"={"groups"={"schedule"}},
+ *      "normalization_context"={"groups"={"scheduled", "common"}},
+ *      "denormalization_context"={"groups"={"scheduled", "common"}},
  *     })
  * @ORM\Entity(repositoryClass="App\Repository\ScheduledBehaviorRepository")
  * @ORM\Table(name="imp_scheduled_behavior")
  * @ORM\HasLifecycleCallbacks()
  */
-class ScheduledBehavior
+class ScheduledBehavior implements BehaviorInterface
 {
     use IdentityAutoTrait;
 
@@ -29,15 +30,31 @@ class ScheduledBehavior
      *
      * @ORM\ManyToOne(targetEntity="Sensor", inversedBy="scheduledBehaviors", cascade={"persist", "refresh"})
      * @ORM\JoinColumn(name="sensor_id", referencedColumnName="id", nullable=false)
-     * @Groups({"schedule"})
+     * @Groups({"scheduled"})
      */
     private $sensor;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="sensor_actions_enum", nullable=false)
+     * @Groups({"scheduled"})
+     */
+    private $action;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="action_argument", type="integer", nullable=true)
+     * @Groups({"scheduled"})
+     */
+    private $actionArgument;
 
     /**
      * @var DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
-     * @Groups({"schedule"})
+     * @Groups({"scheduled"})
      */
     private $createdAt;
 
@@ -45,7 +62,7 @@ class ScheduledBehavior
      * @var DateTime
      *
      * @ORM\Column(name="updated_at", type="datetime", nullable=true)
-     * @Groups({"schedule"})
+     * @Groups({"behavior"})
      */
     private $updatedAt;
 
@@ -53,7 +70,7 @@ class ScheduledBehavior
      * @var DateTime
      *
      * @ORM\Column(name="last_run_at", type="datetime", nullable=true)
-     * @Groups({"schedule"})
+     * @Groups({"scheduled"})
      */
     private $lastRunAt;
 
@@ -61,7 +78,7 @@ class ScheduledBehavior
      * @var bool
      *
      * @ORM\Column(name="finished", type="boolean", nullable=true, options={"default": false})
-     * @Groups({"schedule"})
+     * @Groups({"scheduled"})
      */
     private $finished;
 
@@ -69,7 +86,7 @@ class ScheduledBehavior
      * @var DateTime
      *
      * @ORM\Column(name="next_run_at", type="datetime", nullable=true)
-     * @Groups({"schedule"})
+     * @Groups({"scheduled"})
      */
     private $nextRunAt;
 
@@ -77,7 +94,7 @@ class ScheduledBehavior
      * @var string
      *
      * @ORM\Column(name="relative_date", type="text", nullable=false)
-     * @Groups({"schedule"})
+     * @Groups({"scheduled"})
      */
     private $relativeDate;
 
@@ -85,31 +102,15 @@ class ScheduledBehavior
      * @var DateTime
      *
      * @ORM\Column(name="time", type="time", nullable=true)
-     * @Groups({"schedule"})
+     * @Groups({"scheduled"})
      */
     private $time;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="scheduled_action", type="sensor_actions_enum", nullable=false)
-     * @Groups({"schedule"})
-     */
-    private $scheduledAction;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="scheduled_action_argument", type="integer", nullable=true)
-     * @Groups({"schedule"})
-     */
-    private $scheduledActionArgument;
 
     /**
      * @var bool
      *
      * @ORM\Column(name="repeatable", type="boolean", nullable=false)
-     * @Groups({"schedule"})
+     * @Groups({"scheduled"})
      */
     private $repeatable;
 
@@ -300,46 +301,6 @@ class ScheduledBehavior
     }
 
     /**
-     * @return string
-     */
-    public function getScheduledAction(): string
-    {
-        return $this->scheduledAction;
-    }
-
-    /**
-     * @param string $scheduledAction
-     *
-     * @return ScheduledBehavior
-     */
-    public function setScheduledAction(string $scheduledAction)
-    {
-        $this->scheduledAction = $scheduledAction;
-
-        return $this;
-    }
-
-    /**
-     * @return null | int
-     */
-    public function getScheduledActionArgument()
-    {
-        return $this->scheduledActionArgument;
-    }
-
-    /**
-     * @param int | null $scheduledActionArgument
-     *
-     * @return ScheduledBehavior
-     */
-    public function setScheduledActionArgument($scheduledActionArgument)
-    {
-        $this->scheduledActionArgument = $scheduledActionArgument;
-
-        return $this;
-    }
-
-    /**
      * @return bool
      */
     public function isRepeatable(): bool
@@ -355,4 +316,63 @@ class ScheduledBehavior
         $this->repeatable = $repeatable;
     }
 
+    /**
+     * @return Sensor
+     */
+    public function getActionSensor(): Sensor
+    {
+        return $this->sensor;
+    }
+
+    /**
+     * @param Sensor $sensor
+     *
+     * @return BehaviorInterface
+     */
+    public function setActionSensor(Sensor $sensor): BehaviorInterface
+    {
+        $this->sensor = $sensor;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAction(): string
+    {
+        return $this->action;
+    }
+
+    /**
+     * @param string $action
+     *
+     * @return $this
+     */
+    public function setAction(string $action)
+    {
+        $this->action = $action;
+
+        return $this;
+    }
+
+    /**
+     * @return int | null
+     */
+    public function getActionArgument()
+    {
+        return $this->actionArgument;
+    }
+
+    /**
+     * @param int | null $argument
+     *
+     * @return $this
+     */
+    public function setActionArgument($argument)
+    {
+        $this->actionArgument = $argument;
+
+        return $this;
+    }
 }

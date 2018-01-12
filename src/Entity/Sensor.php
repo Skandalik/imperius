@@ -15,8 +15,8 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
 /**
  * @ApiResource(
  *     attributes={
- *      "normalization_context"={"groups"={"sensor"}},
- *      "denormalization_context"={"groups"={"sensor", "behavior"}},
+ *      "normalization_context"={"groups"={"sensor", "common"}},
+ *      "denormalization_context"={"groups"={"sensor", "behavior", "common"}},
  *      "force_eager"=false
  *     })
  * @ORM\Entity(repositoryClass="App\Repository\SensorRepository")
@@ -138,11 +138,11 @@ class Sensor
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="Behavior", mappedBy="sourceSensor", orphanRemoval=true, cascade={"persist", "refresh"})
+     * @ORM\OneToMany(targetEntity="ManualBehavior", mappedBy="sensor", orphanRemoval=true, cascade={"persist", "refresh"})
      * @Groups({"sensor"})
      * @ApiSubresource()
      */
-    private $behaviors;
+    private $manualBehaviors;
 
     /**
      * @var ArrayCollection
@@ -168,7 +168,7 @@ class Sensor
             ->setSensorIp("")
             ->setCreatedAt(null)
         ;
-        $this->behaviors = new ArrayCollection();
+        $this->manualBehaviors = new ArrayCollection();
     }
 
     /**
@@ -467,42 +467,42 @@ class Sensor
     /**
      * @return ArrayCollection
      */
-    public function getBehaviors()
+    public function getManualBehaviors()
     {
-        return $this->behaviors;
+        return $this->manualBehaviors;
     }
 
     /**
-     * @param ArrayCollection $behaviors
+     * @param ArrayCollection $manualBehaviors
      */
-    public function setBehaviors(ArrayCollection $behaviors)
+    public function setManualBehaviors(ArrayCollection $manualBehaviors)
     {
-        $this->behaviors = $behaviors;
+        $this->manualBehaviors = $manualBehaviors;
     }
 
     /**
-     * @param Behavior $behavior
+     * @param ManualBehavior $behavior
      *
      * @return Sensor
      */
-    public function addBehavior(Behavior $behavior)
+    public function addBehavior(ManualBehavior $behavior)
     {
-        if (!$this->behaviors->contains($behavior)) {
+        if (!$this->manualBehaviors->contains($behavior)) {
             return $this;
         }
-        $this->behaviors[] = $behavior;
-        $behavior->setSourceSensor($this);
+        $this->manualBehaviors[] = $behavior;
+        $behavior->setSensor($this);
 
         return $this;
     }
 
     /**
-     * @param Behavior $behavior
+     * @param ManualBehavior $behavior
      */
-    public function removeBehavior(Behavior $behavior)
+    public function removeBehavior(ManualBehavior $behavior)
     {
-        $this->behaviors->removeElement($behavior);
-        $behavior->setSourceSensor(null);
+        $this->manualBehaviors->removeElement($behavior);
+        $behavior->setSensor(null);
     }
     /**
      * @return ArrayCollection

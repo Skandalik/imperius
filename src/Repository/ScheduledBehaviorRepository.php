@@ -2,14 +2,14 @@
 declare(strict_types=1);
 namespace App\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use App\Repository\Abstraction\BehaviorRepository;
 
-class ScheduledBehaviorRepository extends EntityRepository
+class ScheduledBehaviorRepository extends BehaviorRepository
 {
     /**
-     * @return mixed
+     * @return array
      */
-    public function findAllNotFinished()
+    public function findAllNotFinished(): array
     {
         $qb = $this->createQueryBuilder('sb');
         $qb->where('sb.finished = false');

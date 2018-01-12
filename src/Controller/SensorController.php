@@ -7,7 +7,8 @@ use App\Event\SensorUpdateEvent;
 use App\Form\SensorType;
 use App\Type\SensorStateEnumType;
 use App\Util\MosquittoWrapper\MosquittoPublisher;
-use App\Util\SchedulerApplet\ScheduleExecutor;
+use App\Util\ScheduledBehavior\ScheduledBehaviorManager;
+use App\Util\SensorManager\SensorMosquittoPublisher;
 use App\Util\TopicGenerator\TopicGenerator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -30,26 +31,17 @@ class SensorController extends GenericController
      *     }
      * )
      * @Method("PUT")
-     * @param MosquittoPublisher       $mosquittoPublisher
-     * @param EventDispatcherInterface $dispatcher
-     * @param TopicGenerator           $topicGenerator
+     * @param SensorMosquittoPublisher $publisher
      * @param                          $id
      * @param                          $status
      *
      * @return Response
      */
-    public function setStatusAction(
-        MosquittoPublisher $mosquittoPublisher,
-        EventDispatcherInterface $dispatcher,
-        TopicGenerator $topicGenerator,
-        $id,
-        $status
-    ) {
+    public function setStatusAction(SensorMosquittoPublisher $publisher, $id, $status)
+    {
         /** @var Sensor $sensor */
         $sensor = $this->getRepository()->find($id);
-        $uuid = $sensor->getUuid();
-        $topic = $topicGenerator->generate($uuid, ['status', 'set']);
-        $mosquittoPublisher->publish($topic, $status);
+        $publisher->publishSetSensorStatus($sensor, $status);
 
         return $this->serializeObject($sensor);
     }
@@ -63,26 +55,17 @@ class SensorController extends GenericController
      *     }
      * )
      * @Method("PUT")
-     * @param MosquittoPublisher       $mosquittoPublisher
-     * @param EventDispatcherInterface $dispatcher
-     * @param TopicGenerator           $topicGenerator
+     * @param SensorMosquittoPublisher $publisher
      * @param                          $id
      * @param                          $status
      *
      * @return Response
      */
-    public function setStateAction(
-        MosquittoPublisher $mosquittoPublisher,
-        EventDispatcherInterface $dispatcher,
-        TopicGenerator $topicGenerator,
-        $id,
-        $status
-    ) {
+    public function setStateAction(SensorMosquittoPublisher $publisher, $id, $status)
+    {
         /** @var Sensor $sensor */
         $sensor = $this->getRepository()->find($id);
-        $uuid = $sensor->getUuid();
-        $topic = $topicGenerator->generate($uuid, ['status', 'set']);
-        $mosquittoPublisher->publish($topic, strval(SensorStateEnumType::getFlippedValue($status)));
+        $publisher->publishSetSensorStatus($sensor, strval(SensorStateEnumType::getFlippedValue($status)));
 
         return $this->serializeObject($sensor);
     }
@@ -97,23 +80,16 @@ class SensorController extends GenericController
      *     }
      * )
      * @Method("GET")
-     * @param MosquittoPublisher       $mosquittoPublisher
-     * @param TopicGenerator           $topicGenerator
+     * @param SensorMosquittoPublisher $publisher
      * @param                          $id
      *
      * @return Response
      */
-    public function checkStatusAction(
-        MosquittoPublisher $mosquittoPublisher,
-        TopicGenerator $topicGenerator,
-        $id
-    ) {
+    public function checkStatusAction(SensorMosquittoPublisher $publisher, $id)
+    {
         /** @var Sensor $sensor */
         $sensor = $this->getRepository()->find($id);
-        $arr = $sensor->getBehaviors();
-        $uuid = $sensor->getUuid();
-        $checkStatusTopic = $topicGenerator->generate($uuid, ['status', 'check']);
-        $mosquittoPublisher->publish($checkStatusTopic);
+        $publisher->publishCheckSensorStatus($sensor);
 
         return $this->serializeObject($sensor);
     }
@@ -127,18 +103,13 @@ class SensorController extends GenericController
      *     }
      * )
      * @Method("GET")
-     * @param MosquittoPublisher $mosquittoPublisher
-     * @param TopicGenerator     $topicGenerator
+     * @param SensorMosquittoPublisher $publisher
      *
      * @return Response
      */
-    public function checkBulkStatusAction(
-        MosquittoPublisher $mosquittoPublisher,
-        TopicGenerator $topicGenerator
-    ) {
-        $checkStatusTopic = $topicGenerator->generate('all', ['status', 'check']);
-
-        $mosquittoPublisher->publish($checkStatusTopic);
+    public function checkBulkStatusAction(SensorMosquittoPublisher $publisher)
+    {
+        $publisher->publishCheckAllSensorsStatus();
 
         return $this->serializeObject($this->getRepository()->findAll());
     }
@@ -148,8 +119,10 @@ class SensorController extends GenericController
      *
      * @return Response
      */
-    private function serializeObject($sensor): Response
-    {
+    private
+    function serializeObject(
+        $sensor
+    ): Response {
         $response = new Response($this->getSerializer()->serialize($sensor, 'json'));
         $response->headers->set('Content-Type', 'application/json');
 

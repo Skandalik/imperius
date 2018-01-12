@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\ScheduledBehavior;
 use App\Repository\ScheduledBehaviorRepository;
-use App\Util\SchedulerApplet\ScheduleExecutor;
+use App\Util\ScheduledBehavior\ScheduledBehaviorManager;
 use Doctrine\ORM\EntityManagerInterface;
 use function sleep;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -26,7 +26,7 @@ class ScanScheduledTasksCommand extends ContainerAwareCommand
     /** @var ScheduledBehaviorRepository */
     private $repository;
 
-    /** @var ScheduleExecutor */
+    /** @var ScheduledBehaviorManager */
     private $scheduleExecutor;
 
     /** @var bool  */
@@ -36,7 +36,7 @@ class ScanScheduledTasksCommand extends ContainerAwareCommand
         $name = null,
         EventDispatcherInterface $eventDispatcher,
         EntityManagerInterface $entityManager,
-        ScheduleExecutor $scheduleExecutor
+        ScheduledBehaviorManager $scheduleExecutor
     ) {
         parent::__construct($name);
         $this->eventDispatcher = $eventDispatcher;
@@ -51,7 +51,7 @@ class ScanScheduledTasksCommand extends ContainerAwareCommand
 
     protected function configure()
     {
-        $this->setName('sensors:scan:scheduled');
+        $this->setName('sensors:scheduled');
     }
 
     protected function initialize(InputInterface $input, OutputInterface $output)
@@ -74,7 +74,7 @@ class ScanScheduledTasksCommand extends ContainerAwareCommand
             $output->writeln("Number of schedulers: " . count($schedulers));
             /** @var ScheduledBehavior $scheduled */
             foreach ($schedulers as $scheduled) {
-                $this->scheduleExecutor->executeScheduledBehavior($scheduled);
+                $this->scheduleExecutor->execute($scheduled);
             }
             sleep(5);
         }

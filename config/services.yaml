@@ -51,6 +51,6 @@ services:
         tags:
             - { name: kernel.event_listener, event: sensor.disconnect }
 
-    App\Util\BehaviorApplet\Checker\BehaviorChecker:
+    App\Util\ManualBehavior\ManualBehaviorManager:
         tags:
             - { name: kernel.event_listener, event: sensor.check, method: checkSensor }

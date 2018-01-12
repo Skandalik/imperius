@@ -5,6 +5,7 @@ namespace App\Util\ConditionChecker\Factory;
 use App\Util\ConditionChecker\Abstraction\AbstractConditionValueObject;
 use App\Util\ConditionChecker\ValueObject\ConditionValueObject;
 use App\Util\ConditionChecker\ValueObject\ConditionWithArgumentValueObject;
+use function strval;
 
 class ConditionValueObjectFactory
 {
@@ -12,17 +13,17 @@ class ConditionValueObjectFactory
 
     /**
      * @param array  $data
-     * @param string $argument
+     * @param int | null $argument
      *
      * @return AbstractConditionValueObject
      */
-    public function createCondition(array $data, string $argument = '')
+    public function create(array $data, $argument = null)
     {
         if (self::CONDITION_WITH_ARGUMENT_COUNT === count($data)) {
-            return $this->createWithArgument($data, $argument);
+            return $this->createConditionWithArgument($data, strval($argument));
         }
 
-        return $this->create($data);
+        return $this->createCondition($data);
     }
 
     /**
@@ -30,7 +31,7 @@ class ConditionValueObjectFactory
      *
      * @return AbstractConditionValueObject
      */
-    private function create(array $data): AbstractConditionValueObject
+    private function createCondition(array $data): AbstractConditionValueObject
     {
         return new ConditionValueObject($data);
     }
@@ -41,7 +42,7 @@ class ConditionValueObjectFactory
      *
      * @return AbstractConditionValueObject
      */
-    private function createWithArgument(array $data, string $argument): AbstractConditionValueObject
+    private function createConditionWithArgument(array $data, string $argument): AbstractConditionValueObject
     {
         return new ConditionWithArgumentValueObject($data, $argument);
     }

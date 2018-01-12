@@ -12,8 +12,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 /**
  * @ApiResource(
  *     attributes={
- *     "normalization_context"={"groups"={"room"}},
- *     "denormalization_context"={"groups"={"sensor"}},
+ *     "normalization_context"={"groups"={"room", "common"}},
+ *     "denormalization_context"={"groups"={"room", "common"}},
  *     })
  * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="App\Repository\RoomRepository")
