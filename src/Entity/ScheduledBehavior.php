@@ -58,12 +58,12 @@ class ScheduledBehavior
     private $lastRunAt;
 
     /**
-     * @var DateTime
+     * @var bool
      *
-     * @ORM\Column(name="finished_run_at", type="datetime", nullable=true)
+     * @ORM\Column(name="finished", type="boolean", nullable=true, options={"default": false})
      * @Groups({"schedule"})
      */
-    private $finishedRunAt;
+    private $finished;
 
     /**
      * @var DateTime
@@ -84,7 +84,7 @@ class ScheduledBehavior
     /**
      * @var DateTime
      *
-     * @ORM\Column(name="time", type="time", nullable=false)
+     * @ORM\Column(name="time", type="time", nullable=true)
      * @Groups({"schedule"})
      */
     private $time;
@@ -93,7 +93,7 @@ class ScheduledBehavior
      * @var string
      *
      * @ORM\Column(name="scheduled_action", type="sensor_actions_enum", nullable=false)
-     * @Groups({"behavior"})
+     * @Groups({"schedule"})
      */
     private $scheduledAction;
 
@@ -101,9 +101,17 @@ class ScheduledBehavior
      * @var int
      *
      * @ORM\Column(name="scheduled_action_argument", type="integer", nullable=true)
-     * @Groups({"behavior"})
+     * @Groups({"schedule"})
      */
     private $scheduledActionArgument;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="repeatable", type="boolean", nullable=false)
+     * @Groups({"schedule"})
+     */
+    private $repeatable;
 
     /**
      * @ORM\PrePersist()
@@ -127,6 +135,8 @@ class ScheduledBehavior
     public function __construct()
     {
         $this->setCreatedAt(new DateTime());
+        $this->setRepeatable(false);
+        $this->setFinished(false);
     }
 
     /**
@@ -210,21 +220,21 @@ class ScheduledBehavior
     }
 
     /**
-     * @return DateTime | null
+     * @return bool
      */
-    public function getFinishedRunAt()
+    public function isFinished()
     {
-        return $this->finishedRunAt;
+        return $this->finished;
     }
 
     /**
-     * @param DateTime | null $finishedRunAt
+     * @param bool $finished
      *
      * @return ScheduledBehavior
      */
-    public function setFinishedRunAt($finishedRunAt)
+    public function setFinished($finished)
     {
-        $this->finishedRunAt = $finishedRunAt;
+        $this->finished = $finished;
 
         return $this;
     }
@@ -234,7 +244,7 @@ class ScheduledBehavior
      */
     public function getNextRunAt()
     {
-        return $this->nextRunAt ? date_format($this->nextRunAt, 'Y-m-d H:i') : null;
+        return is_null($this->nextRunAt) ? null : date_format($this->nextRunAt, 'Y-m-d H:i');
     }
 
     /**
@@ -274,7 +284,7 @@ class ScheduledBehavior
      */
     public function getTime()
     {
-        return date_format($this->time, 'H:i:s');
+        return is_null($this->time) ? '' : date_format($this->time, 'H:i:s');
     }
 
     /**
@@ -327,6 +337,22 @@ class ScheduledBehavior
         $this->scheduledActionArgument = $scheduledActionArgument;
 
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRepeatable(): bool
+    {
+        return $this->repeatable;
+    }
+
+    /**
+     * @param bool $repeatable
+     */
+    public function setRepeatable(bool $repeatable)
+    {
+        $this->repeatable = $repeatable;
     }
 
 }

@@ -7,6 +7,7 @@ use App\Type\SensorConditionsEnumType;
 use App\Util\ConditionChecker\Abstraction\AbstractConditionValueObject;
 use App\Util\ConditionChecker\Factory\ConditionValueObjectFactory;
 use function count;
+use function intval;
 use function strval;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
@@ -53,7 +54,7 @@ class ConditionChecker
      */
     private function getSensorDataFromProperty(Sensor $sensor, AbstractConditionValueObject $conditionDataObject)
     {
-        return $this->propertyAccessor->getValue($sensor, $conditionDataObject->getProperty());
+        return intval($this->propertyAccessor->getValue($sensor, $conditionDataObject->getProperty()));
     }
 
     /**

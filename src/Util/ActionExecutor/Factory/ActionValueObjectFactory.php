@@ -16,7 +16,7 @@ class ActionValueObjectFactory
      *
      * @return AbstractActionValueObject
      */
-    public function createCondition(array $data, string $argument = '')
+    public function createAction(array $data, string $argument = '')
     {
         if (self::CONDITION_WITH_ARGUMENT_COUNT === count($data)) {
             return $this->createWithArgument($data, $argument);

@@ -4,6 +4,8 @@ namespace App\Util\SchedulerApplet;
 
 use App\Entity\ScheduledBehavior;
 use App\Util\ActionExecutor\ActionExecutor;
+use DateTime;
+use const PHP_EOL;
 use function strval;
 
 class ScheduleExecutor
@@ -37,17 +39,25 @@ class ScheduleExecutor
     {
         if ($this->scheduleChecker->checkDate($scheduledBehavior)) {
             $this->execute($scheduledBehavior);
+
+            return;
         }
+        echo "Date doesn't match: " . $scheduledBehavior->getSensor()->getId() . PHP_EOL;
+
+        return;
     }
 
-    public function execute(ScheduledBehavior $scheduledBehavior)
+    private function execute(ScheduledBehavior $scheduledBehavior)
     {
-        if ($scheduledBehavior->getSensor()->getActive()) {
-            $this->actionExecutor->executeAction(
-                $scheduledBehavior->getSensor(),
-                $scheduledBehavior->getScheduledAction(),
-                strval($scheduledBehavior->getScheduledActionArgument())
-            );
-        }
+        echo PHP_EOL;
+        echo "Executing behavior for: " . $scheduledBehavior->getSensor()->getId() . PHP_EOL;
+        echo PHP_EOL;
+
+        $this->actionExecutor->executeAction(
+            $scheduledBehavior->getSensor(),
+            $scheduledBehavior->getScheduledAction(),
+            strval($scheduledBehavior->getScheduledActionArgument())
+        );
+        $this->scheduleRenewer->refreshSchedule($scheduledBehavior);
     }
 }
