@@ -14,31 +14,28 @@ use function in_array;
 class DateSupplier
 {
     /**
+     * @param bool   $isRepeatable
      * @param string $date
      * @param string $time
      *
      * @return DateTime
      */
-    public function convertRelativeDate(string $date, string $time)
+    public function convertRelativeDate(bool $isRepeatable, string $date, string $time)
     {
-        $dateWords = explode(' ', $date);
         if (!empty($time)) {
             $timeWords = explode(':', $time);
         }
 
-        if (in_array('every', $dateWords)) {
-            if (count(array_intersect($dateWords, DateSupplierTimeEnum::getReadableValues()))) {
-                $repeatableDate = new DateTime('now', new DateTimeZone('Europe/Warsaw'));
-                $repeatableDate->add(new DateInterval(sprintf('PT%sM', $dateWords[1])));
-
-                return $repeatableDate;
+        if ($isRepeatable) {
+            if ('tomorrow' === $date) {
+                $repeatableDate = new DateTime($date);
+            } else {
+                $repeatableDate = new DateTime('next ' . $date);
             }
-            $repeatableDate = new DateTime('next ' . $dateWords[1]);
             $repeatableDate->setTime((int) $timeWords[0], (int) $timeWords[1]);
 
             return $repeatableDate;
         }
-
 
         $regularDate = new DateTime($date);
         $regularDate->setTime((int) $timeWords[0], (int) $timeWords[1]);

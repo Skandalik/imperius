@@ -127,7 +127,7 @@ class ScheduledBehavior implements BehaviorInterface
             $this->setCreatedAt(new DateTime());
         }
         $date = new DateSupplier();
-        $this->setNextRunAt($date->convertRelativeDate($this->getRelativeDate(), $this->getTime()));
+        $this->setNextRunAt($date->convertRelativeDate($this->isRepeatable(), $this->getRelativeDate(), $this->getTime()));
     }
 
     /**

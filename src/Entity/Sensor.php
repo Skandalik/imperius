@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
  * @ApiResource(
  *     attributes={
  *      "normalization_context"={"groups"={"sensor", "common"}},
- *      "denormalization_context"={"groups"={"sensor", "behavior", "common"}},
+ *      "denormalization_context"={"groups"={"sensor", "manual", "scheduled", "common"}},
  *      "force_eager"=false
  *     })
  * @ORM\Entity(repositoryClass="App\Repository\SensorRepository")
@@ -31,7 +31,7 @@ class Sensor
      * @var string
      *
      * @ORM\Column(name="name", type="string", nullable=true)
-     * @Groups({"sensor", "behavior"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $name;
 
@@ -39,7 +39,7 @@ class Sensor
      * @var string
      *
      * @ORM\Column(name="uuid", type="string", length=50, nullable=false, unique=true)
-     * @Groups({"sensor", "behavior"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $uuid;
 
@@ -47,7 +47,7 @@ class Sensor
      * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom", cascade={"persist", "refresh"})
      * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=true)
      *
-     * @Groups({"sensor", "behavior"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $room;
 
@@ -55,7 +55,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="fetchable", type="boolean", nullable=false)
-     * @Groups({"sensor", "behavior"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $fetchable;
 
@@ -63,7 +63,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="switchable", type="boolean", nullable=false)
-     * @Groups({"sensor", "behavior"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $switchable;
 
@@ -71,7 +71,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="adjustable", type="boolean", nullable=false)
-     * @Groups({"sensor", "behavior"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $adjustable;
 
