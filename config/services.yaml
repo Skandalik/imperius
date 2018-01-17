@@ -51,6 +51,14 @@ services:
         tags:
             - { name: kernel.event_listener, event: sensor.disconnect }
 
+    App\Listener\JobStartListener:
+        tags:
+            - { name: kernel.event_listener, event: job.start }
+
+    App\Listener\JobInterruptListener:
+        tags:
+            - { name: kernel.event_listener, event: job.interrupt }
+
     App\Util\ManualBehavior\ManualBehaviorManager:
         tags:
             - { name: kernel.event_listener, event: sensor.check, method: checkSensor }

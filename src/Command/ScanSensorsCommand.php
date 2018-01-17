@@ -4,10 +4,11 @@ namespace App\Command;
 
 use App\Command\Factory\SensorValueRangeFactory;
 use App\Command\ValueObject\SensorValueRangeValueObject;
+use App\Event\Enum\JobEventEnum;
+use App\Event\JobInterruptEvent;
 use App\Event\SensorCheckEvent;
 use App\Event\SensorDisconnectEvent;
 use App\Event\SensorFoundEvent;
-use App\Event\SensorUpdateEvent;
 use App\Util\TopicGenerator\Enum\TopicEnum;
 use Mosquitto\Client;
 use Mosquitto\Message;
@@ -70,13 +71,13 @@ class ScanSensorsCommand extends ContainerAwareCommand
         $output->writeln("");
         $output->writeln("");
 
-        $client->onDisconnect(
-            function ($rc) use ($output, $client) {
-                $output->writeln('Disconnected. Failure with code: ' . $rc);
-                $output->writeln('Connecting again.');
-                //$this->connectMqttClient($client);
-            }
-        );
+        ////$client->onDisconnect(
+        ////    function ($rc) use ($output, $client) {
+        ////        $output->writeln('Disconnected. Failure with code: ' . $rc);
+        ////        $output->writeln('Connecting again.');
+        ////        //$this->connectMqttClient($client);
+        ////    }
+        //);
 
         $client->onConnect(
             function () use ($output) {
@@ -86,7 +87,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
 
         /** @var Message $message */
         $client->onMessage(
-            function ($message) use ($output) {
+            function ($message) use ($output, $client) {
                 $jsonMessage = json_decode($message->payload, true);
                 if (is_string($jsonMessage['status'])) {
                     $tempStatus = (float) $jsonMessage['status'];
@@ -124,10 +125,10 @@ class ScanSensorsCommand extends ContainerAwareCommand
                         $name = SensorDisconnectEvent::NAME;
                         break;
                     default:
-                        $event = new SensorCheckEvent(
-                            $jsonMessage['uuid'],
-                            $jsonMessage['ble']
-                        );
+                        $client->disconnect();
+                        $event = new JobInterruptEvent('sensors:scan');
+
+                        $name = JobEventEnum::JOB_INTERRUPT;
                         break;
                 }
                 $this->eventDispatcher->dispatch($name, $event);

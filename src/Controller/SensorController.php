@@ -3,24 +3,16 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Sensor;
-use App\Event\SensorUpdateEvent;
-use App\Form\SensorType;
 use App\Type\SensorStateEnumType;
-use App\Util\MosquittoWrapper\MosquittoPublisher;
-use App\Util\ScheduledBehavior\ScheduledBehaviorManager;
 use App\Util\SensorManager\SensorMosquittoPublisher;
-use App\Util\TopicGenerator\TopicGenerator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use function strval;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
+use function strval;
 
 class SensorController extends GenericController
 {
     protected $entityClass = Sensor::class;
-
-    protected $formType = SensorType::class;
 
     /**
      * @Route(
