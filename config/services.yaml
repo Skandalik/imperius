@@ -31,10 +31,6 @@ services:
         arguments:
             - '%env(MOSQUITTO_BROKER_HOST)%'
 
-    App\Command\Repository\SensorApiRedisRepository:
-        arguments:
-            - "@snc_redis.sensor_api"
-
     App\Listener\SensorFoundListener:
         tags:
             - { name: kernel.event_listener, event: sensor.found }
@@ -54,3 +50,15 @@ services:
     App\Listener\SensorDisconnectListener:
         tags:
             - { name: kernel.event_listener, event: sensor.disconnect }
+
+    App\Listener\JobStartListener:
+        tags:
+            - { name: kernel.event_listener, event: job.start }
+
+    App\Listener\JobInterruptListener:
+        tags:
+            - { name: kernel.event_listener, event: job.interrupt }
+
+    App\Util\ManualBehavior\ManualBehaviorManager:
+        tags:
+            - { name: kernel.event_listener, event: sensor.check, method: checkSensor }

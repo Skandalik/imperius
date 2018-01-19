@@ -5,6 +5,7 @@ namespace App\Listener;
 use App\Entity\Sensor;
 use App\Event\SensorDisconnectEvent;
 use App\Repository\SensorRepository;
+use function boolval;
 use Doctrine\ORM\EntityManagerInterface;
 
 class SensorDisconnectListener
@@ -26,10 +27,11 @@ class SensorDisconnectListener
         /** @var Sensor $sensor */
         $sensor = $this->sensorRepository->findByUuid($event->getUuid());
 
-        $sensor->setActive($event->getActive());
+        $sensor->setActive(boolval($event->getState()));
 
         $this->entityManager->persist($sensor);
         $this->entityManager->flush();
+        $this->entityManager->clear();
 
         return;
     }

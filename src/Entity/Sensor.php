@@ -3,16 +3,25 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use App\Entity\Traits\IdentityAutoTrait;
+use App\Type\SensorStateEnumType;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
- * @ApiResource(attributes={"normalization_context"={"groups"={"get"}}})
+ * @ApiResource(
+ *     attributes={
+ *      "normalization_context"={"groups"={"sensor", "common"}},
+ *      "denormalization_context"={"groups"={"sensor", "manual", "scheduled", "common"}},
+ *      "force_eager"=false
+ *     })
  * @ORM\Entity(repositoryClass="App\Repository\SensorRepository")
- * @ORM\HasLifecycleCallbacks
  * @ORM\Table(name="imp_sensor")
+ * @ORM\HasLifecycleCallbacks
  */
 class Sensor
 {
@@ -22,7 +31,7 @@ class Sensor
      * @var string
      *
      * @ORM\Column(name="name", type="string", nullable=true)
-     * @Groups({"get"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $name;
 
@@ -30,23 +39,31 @@ class Sensor
      * @var string
      *
      * @ORM\Column(name="uuid", type="string", length=50, nullable=false, unique=true)
-     * @Groups({"get"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $uuid;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom")
+     * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom", cascade={"persist", "refresh"})
      * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=true)
      *
-     * @Groups({"get"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $room;
 
     /**
      * @var bool
      *
+     * @ORM\Column(name="fetchable", type="boolean", nullable=false)
+     * @Groups({"sensor", "manual", "scheduled"})
+     */
+    private $fetchable;
+
+    /**
+     * @var bool
+     *
      * @ORM\Column(name="switchable", type="boolean", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $switchable;
 
@@ -54,7 +71,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="adjustable", type="boolean", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"sensor", "manual", "scheduled"})
      */
     private $adjustable;
 
@@ -62,7 +79,7 @@ class Sensor
      * @var int
      *
      * @ORM\Column(name="minimum_value", type="integer", nullable=true)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $minimumValue;
 
@@ -70,7 +87,7 @@ class Sensor
      * @var int
      *
      * @ORM\Column(name="maximum_value", type="integer", nullable=true)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $maximumValue;
 
@@ -78,7 +95,7 @@ class Sensor
      * @var int
      *
      * @ORM\Column(name="status", type="integer", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $status;
 
@@ -86,7 +103,7 @@ class Sensor
      * @var bool
      *
      * @ORM\Column(name="active", type="boolean", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"sensor"})
      */
     private $active;
 
@@ -119,6 +136,24 @@ class Sensor
     private $lastDataSentAt;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="ManualBehavior", mappedBy="sensor", orphanRemoval=true, cascade={"persist", "refresh"})
+     * @Groups({"sensor"})
+     * @ApiSubresource()
+     */
+    private $manualBehaviors;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="ScheduledBehavior", mappedBy="sensor", orphanRemoval=true, cascade={"persist", "refresh"})
+     * @Groups({"sensor"})
+     * @ApiSubresource()
+     */
+    private $scheduledBehaviors;
+
+    /**
      * Sensor constructor.
      */
     public function __construct()
@@ -126,12 +161,14 @@ class Sensor
         $this
             ->setUuid("")
             ->setStatus(0)
+            ->setFetchable(false)
             ->setSwitchable(false)
             ->setAdjustable(false)
             ->setActive(false)
             ->setSensorIp("")
             ->setCreatedAt(null)
         ;
+        $this->manualBehaviors = new ArrayCollection();
     }
 
     /**
@@ -288,26 +325,6 @@ class Sensor
     }
 
     /**
-     * @return bool
-     */
-    public function isActive()
-    {
-        return $this->active;
-    }
-
-    /**
-     * @param bool $active
-     *
-     * @return Sensor
-     */
-    public function setActive(bool $active)
-    {
-        $this->active = $active;
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getSensorIp()
@@ -407,4 +424,139 @@ class Sensor
         return $this;
     }
 
+    /**
+     * @return bool
+     */
+    public function isFetchable(): bool
+    {
+        return $this->fetchable;
+    }
+
+    /**
+     * @param $fetchable
+     *
+     * @return Sensor
+     */
+    public function setFetchable($fetchable): Sensor
+    {
+        $this->fetchable = $fetchable;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getActive(): bool
+    {
+        return $this->active;
+    }
+
+    /**
+     * @param bool $active
+     *
+     * @return Sensor
+     */
+    public function setActive(bool $active): Sensor
+    {
+        $this->active = $active;
+
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getManualBehaviors()
+    {
+        return $this->manualBehaviors;
+    }
+
+    /**
+     * @param ArrayCollection $manualBehaviors
+     */
+    public function setManualBehaviors(ArrayCollection $manualBehaviors)
+    {
+        $this->manualBehaviors = $manualBehaviors;
+    }
+
+    /**
+     * @param ManualBehavior $behavior
+     *
+     * @return Sensor
+     */
+    public function addBehavior(ManualBehavior $behavior)
+    {
+        if (!$this->manualBehaviors->contains($behavior)) {
+            return $this;
+        }
+        $this->manualBehaviors[] = $behavior;
+        $behavior->setSensor($this);
+
+        return $this;
+    }
+
+    /**
+     * @param ManualBehavior $behavior
+     */
+    public function removeBehavior(ManualBehavior $behavior)
+    {
+        $this->manualBehaviors->removeElement($behavior);
+        $behavior->setSensor(null);
+    }
+    /**
+     * @return ArrayCollection
+     */
+    public function getScheduledBehaviors()
+    {
+        return $this->scheduledBehaviors;
+    }
+
+    /**
+     * @param ArrayCollection $scheduledBehaviors
+     */
+    public function setScheduledBehaviors(ArrayCollection $scheduledBehaviors)
+    {
+        $this->scheduledBehaviors = $scheduledBehaviors;
+    }
+
+    /**
+     * @param ScheduledBehavior $scheduledBehavior
+     *
+     * @return Sensor
+     */
+    public function addScheduledBehavior(ScheduledBehavior $scheduledBehavior)
+    {
+        if (!$this->scheduledBehaviors->contains($scheduledBehavior)) {
+            return $this;
+        }
+        $this->scheduledBehaviors[] = $scheduledBehavior;
+        $scheduledBehavior->setSensor($this);
+
+        return $this;
+    }
+
+    /**
+     * @param ScheduledBehavior $scheduledBehavior
+     */
+    public function removeScheduledBehavior(ScheduledBehavior $scheduledBehavior)
+    {
+        $this->scheduledBehaviors->removeElement($scheduledBehavior);
+        $scheduledBehavior->setSensor(null);
+    }
+
+    /**
+     * @return $this
+     */
+    public function updateTimestamp()
+    {
+        $this->setUpdatedAt(new DateTime());
+
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->getUuid();
+    }
 }

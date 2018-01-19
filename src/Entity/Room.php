@@ -3,7 +3,6 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use ApiPlatform\Core\Annotation\ApiSubresource;
 use App\Entity\Traits\IdentityAutoTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -11,7 +10,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource(attributes={"normalization_context"={"groups"={"get"}}})
+ * @ApiResource(
+ *     attributes={
+ *     "normalization_context"={"groups"={"room", "common"}},
+ *     "denormalization_context"={"groups"={"room", "common"}},
+ *     })
  * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="App\Repository\RoomRepository")
  * @ORM\Table(name="imp_room")
@@ -24,14 +27,14 @@ class Room
      * @var string
      *
      * @ORM\Column(name="room", type="string", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"room", "sensor", "behavior"})
      */
     private $room;
 
     /**
      * @var Collection
      *
-     * @ORM\OneToMany(targetEntity="Sensor", mappedBy="room")
+     * @ORM\OneToMany(targetEntity="Sensor", mappedBy="room", cascade={"persist", "refresh"})
      */
     private $sensorsInRoom;
 
@@ -39,7 +42,7 @@ class Room
      * @var int
      *
      * @ORM\Column(name="floor", type="integer", nullable=false)
-     * @Groups({"get"})
+     * @Groups({"room", "sensor", "behavior"})
      */
     private $floor;
 

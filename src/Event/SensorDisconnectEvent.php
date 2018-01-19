@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace App\Event;
 
 use App\Event\Enum\SensorEventEnum;
+use App\Type\SensorStateEnumType;
 use Symfony\Component\EventDispatcher\Event;
 
 class SensorDisconnectEvent extends Event
@@ -12,8 +13,8 @@ class SensorDisconnectEvent extends Event
     /** @var string */
     protected $uuid;
 
-    /** @var bool */
-    protected $active;
+    /** @var string */
+    protected $state;
 
     /**
      * @param string $uuid
@@ -21,7 +22,7 @@ class SensorDisconnectEvent extends Event
     public function __construct(string $uuid)
     {
         $this->uuid = $uuid;
-        $this->active = false;
+        $this->state = false;
     }
 
     /**
@@ -33,10 +34,10 @@ class SensorDisconnectEvent extends Event
     }
 
     /**
-     * @return bool
+     * @return string
      */
-    public function getActive(): bool
+    public function getState(): string
     {
-        return $this->active;
+        return $this->state;
     }
 }

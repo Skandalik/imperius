@@ -6,7 +6,13 @@ use App\Util\TopicGenerator\Enum\TopicEnum;
 
 class TopicGenerator
 {
-    public function generate(string $uuid, array $topicPostfix)
+    /**
+     * @param string $uuid
+     * @param array  $topicPostfix
+     *
+     * @return string
+     */
+    public function generate(string $uuid, array $topicPostfix): string
     {
         $topic = $uuid;
 
