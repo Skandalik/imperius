@@ -3,13 +3,9 @@ declare(strict_types=1);
 namespace App\Util\DateSupplier;
 
 use App\Entity\ScheduledBehavior;
-use App\Util\DateSupplier\Enum\DateSupplierTimeEnum;
-use function array_intersect;
-use DateInterval;
 use DateTime;
 use DateTimeZone;
 use function explode;
-use function in_array;
 
 class DateSupplier
 {
@@ -27,7 +23,10 @@ class DateSupplier
         }
 
         if ($isRepeatable) {
-            if ('tomorrow' === $date) {
+            if ('today' === $date) {
+                $repeatableDate = new DateTime($date);
+            }
+            elseif ('tomorrow' === $date) {
                 $repeatableDate = new DateTime($date);
             } else {
                 $repeatableDate = new DateTime('next ' . $date);

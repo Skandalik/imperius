@@ -5,12 +5,10 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use App\Entity\Traits\IdentityAutoTrait;
-use App\Type\SensorStateEnumType;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
  * @ApiResource(
@@ -44,7 +42,7 @@ class Sensor
     private $uuid;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom", cascade={"persist", "refresh"})
+     * @ORM\ManyToOne(targetEntity="Room", inversedBy="sensorsInRoom")
      * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=true)
      *
      * @Groups({"sensor", "manual", "scheduled"})
@@ -138,7 +136,7 @@ class Sensor
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="ManualBehavior", mappedBy="sensor", orphanRemoval=true, cascade={"persist", "refresh"})
+     * @ORM\OneToMany(targetEntity="ManualBehavior", mappedBy="sensor", orphanRemoval=true, cascade={"persist", "refresh"}, orphanRemoval=true)
      * @Groups({"sensor"})
      * @ApiSubresource()
      */
@@ -147,7 +145,7 @@ class Sensor
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="ScheduledBehavior", mappedBy="sensor", orphanRemoval=true, cascade={"persist", "refresh"})
+     * @ORM\OneToMany(targetEntity="ScheduledBehavior", mappedBy="sensor", orphanRemoval=true, cascade={"persist", "refresh"}, orphanRemoval=true)
      * @Groups({"sensor"})
      * @ApiSubresource()
      */
@@ -465,7 +463,7 @@ class Sensor
     }
 
     /**
-     * @return ArrayCollection
+     * @return ArrayCollection | ManualBehavior[]
      */
     public function getManualBehaviors()
     {
@@ -473,9 +471,9 @@ class Sensor
     }
 
     /**
-     * @param ArrayCollection $manualBehaviors
+     * @param ArrayCollection | ManualBehavior[] $manualBehaviors
      */
-    public function setManualBehaviors(ArrayCollection $manualBehaviors)
+    public function setManualBehaviors($manualBehaviors)
     {
         $this->manualBehaviors = $manualBehaviors;
     }
@@ -505,7 +503,7 @@ class Sensor
         $behavior->setSensor(null);
     }
     /**
-     * @return ArrayCollection
+     * @return ArrayCollection | ScheduledBehavior[]
      */
     public function getScheduledBehaviors()
     {
@@ -513,9 +511,9 @@ class Sensor
     }
 
     /**
-     * @param ArrayCollection $scheduledBehaviors
+     * @param ArrayCollection | ScheduledBehavior[] $scheduledBehaviors
      */
-    public function setScheduledBehaviors(ArrayCollection $scheduledBehaviors)
+    public function setScheduledBehaviors($scheduledBehaviors)
     {
         $this->scheduledBehaviors = $scheduledBehaviors;
     }

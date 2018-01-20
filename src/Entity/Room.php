@@ -56,6 +56,15 @@ class Room
         $this->sensorsInRoom = new ArrayCollection();
     }
 
+    /**
+     * @ORM\PreRemove()
+     */
+    public function preRemove()
+    {
+        foreach ($this->sensorsInRoom as $sensor) {
+            $this->removeSensor($sensor);
+        }
+    }
 
     // Adding both an adder and a remover as well as updating the reverse relation are mandatory
     // if you want Doctrine to automatically update and persist (thanks to the "cascade" option) the related entity
@@ -93,19 +102,19 @@ class Room
     }
 
     /**
-     * @return Collection
+     * @return Collection | Sensor[]
      */
-    public function getSensorsInRoom(): Collection
+    public function getSensorsInRoom()
     {
         return $this->sensorsInRoom;
     }
 
     /**
-     * @param Collection $sensorsInRoom
+     * @param Collection | Sensor[] $sensorsInRoom
      *
      * @return Room
      */
-    public function setSensorsInRoom(Collection $sensorsInRoom): Room
+    public function setSensorsInRoom($sensorsInRoom): Room
     {
         $this->sensorsInRoom = $sensorsInRoom;
 
