@@ -55,6 +55,10 @@ services:
         tags:
             - { name: kernel.event_listener, event: job.start }
 
+    App\Listener\JobStopListener:
+        tags:
+            - { name: kernel.event_listener, event: job.stop }
+
     App\Listener\JobInterruptListener:
         tags:
             - { name: kernel.event_listener, event: job.interrupt }

@@ -4,11 +4,13 @@ namespace App\Listener;
 
 use App\Entity\Job;
 use App\Event\JobStartEvent;
+use App\Event\JobStopEvent;
 use App\Repository\JobRepository;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
-class JobStartListener
+class JobStopListener
 {
     /** @var JobRepository */
     private $jobRepository;
@@ -26,14 +28,14 @@ class JobStartListener
         $this->logger = $logger;
     }
 
-    public function onJobStart(JobStartEvent $event)
+    public function onJobStop(JobStopEvent $event)
     {
         /** @var Job $job */
         $job = $event->getJob();
-        $job->setRunning(true);
+        $job->setRunning(false);
         $job->setError(false);
-        $job->setFinished(false);
-        $job->setJobPid($event->getPid());
+        $job->setFinished(true);
+        $job->setLastRunAt(new DateTime());
         $this->entityManager->flush();
         $this->entityManager->clear();
 

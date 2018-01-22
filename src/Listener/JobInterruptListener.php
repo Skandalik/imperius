@@ -30,9 +30,6 @@ class JobInterruptListener
     {
         /** @var Job $job */
         $job = $this->jobRepository->findByCommandName($event->getCommandName());
-
-        $this->logger->error('Command ' . $job->getCommand() . ' has been interrupted.');
-        echo('Command ' . $job->getCommand() . ' has been interrupted.');
         $job->setRunning(false);
         $job->setError(true);
         $job->setJobPid(null);
