@@ -245,7 +245,7 @@ class ScheduledBehavior implements BehaviorInterface
      */
     public function getNextRunAt()
     {
-        return is_null($this->nextRunAt) ? null : date_format($this->nextRunAt, 'Y-m-d H:i');
+        return $this->nextRunAt;
     }
 
     /**

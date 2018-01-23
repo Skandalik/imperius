@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Sensor;
 use App\Type\SensorStateEnumType;
 use App\Util\SensorManager\SensorMosquittoPublisher;
+use function intval;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,6 +35,8 @@ class SensorController extends GenericController
         /** @var Sensor $sensor */
         $sensor = $this->getRepository()->find($id);
         $publisher->publishSetSensorStatus($sensor, $status);
+
+        $sensor->setStatus(intval($status));
 
         return $this->serializeObject($sensor);
     }

@@ -63,7 +63,7 @@ class DateSupplier
 
             return $scheduledBehavior;
         }
-        $nextRun = $this->convertRelativeDate($scheduledBehavior->getRelativeDate(), $scheduledBehavior->getTime());
+        $nextRun = $this->convertRelativeDate($scheduledBehavior->isRepeatable(), $scheduledBehavior->getRelativeDate(), $scheduledBehavior->getTime());
         $scheduledBehavior->setNextRunAt($nextRun);
 
         return $scheduledBehavior;

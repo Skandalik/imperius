@@ -28,7 +28,7 @@ class ScheduleChecker
     {
         $now = date_format($this->dateSupplier->getNowDate(), 'Y-m-d H:i');
 
-        if ($scheduledBehavior->getNextRunAt() === $now) {
+        if (date_format($scheduledBehavior->getNextRunAt(), 'Y-m-d H:i') === $now) {
             return true;
         }
 

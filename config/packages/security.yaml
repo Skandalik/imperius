@@ -9,7 +9,7 @@ security:
 #TODO fix security
     encoders:
         App\Entity\User:
-            algorithm: plaintext
+            algorithm: bcrypt
     providers:
         db_provider:
             entity:

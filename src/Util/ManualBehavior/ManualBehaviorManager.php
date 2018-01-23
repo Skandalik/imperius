@@ -88,8 +88,6 @@ class ManualBehaviorManager
     private function checkCondition(ManualBehavior $behavior)
     {
         if (!$this->conditionChecker->checkCondition($behavior)) {
-            echo "Behavior requirements didn't match for sensor " . $behavior->getSensor()->getName() . PHP_EOL;
-            echo PHP_EOL;
 
             return;
         }

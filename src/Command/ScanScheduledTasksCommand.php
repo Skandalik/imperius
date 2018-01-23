@@ -68,7 +68,7 @@ class ScanScheduledTasksCommand extends ContainerAwareCommand
 
 
         $output->writeln("Fetching database");
-        while ($this->inLoop) {
+        while (true) {
             pcntl_signal_dispatch();
             $schedulers = $this->repository->findAllNotFinished();
             $output->writeln("Number of schedulers: " . count($schedulers));
@@ -76,7 +76,7 @@ class ScanScheduledTasksCommand extends ContainerAwareCommand
             foreach ($schedulers as $scheduled) {
                 $this->scheduleExecutor->execute($scheduled);
             }
-            sleep(5);
+            usleep(3000000);
         }
 
         $output->writeln("Exiting gracefully...");

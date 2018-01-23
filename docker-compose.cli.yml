@@ -9,8 +9,6 @@ services:
           - 8180:80
         volumes_from:
             - code
-        depends_on:
-          - mysql_unit
 
     redis-cli:
         container_name: redis-cli.imperius.home
@@ -23,16 +21,6 @@ services:
             - imperius
         depends_on:
             - redis
-
-    mysql_unit:
-        container_name: mysql-unit.imperius.com
-        privileged: true
-        build: ./docker/mysql_tmpfs
-        networks:
-            - imperius
-        environment:
-            - MYSQLD_RAM_SIZE=512
-            - TIMEZONE=Europe/Warsaw
 
     composer:
         container_name: composer.imperius.home

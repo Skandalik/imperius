@@ -31,13 +31,9 @@ class ScheduledBehaviorManager
     public function execute(ScheduledBehavior $scheduledBehavior)
     {
         if (!$this->scheduleChecker->check($scheduledBehavior)) {
-            echo "Date doesn't match: " . $scheduledBehavior->getSensor()->getId() . PHP_EOL;
             return false;
         }
 
-        echo PHP_EOL;
-        echo "Executing behavior for: " . $scheduledBehavior->getSensor()->getId() . PHP_EOL;
-        echo PHP_EOL;
         $this->actionManager->performAction($scheduledBehavior);
         $this->scheduleRenewer->refresh($scheduledBehavior);
         return true;
