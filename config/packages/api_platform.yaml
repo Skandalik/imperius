@@ -8,3 +8,11 @@ api_platform:
         pagination:
             # To enable or disable pagination for all resource collections by default.
             enabled: false
+    swagger:
+         api_keys:
+             - { name: 'Authorization', type: 'header' }
+    http_cache:
+        max_age: 0
+        shared_max_age: 3600
+        vary: ['Content-Type', 'Authorization']
+        public: true
