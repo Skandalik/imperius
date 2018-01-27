@@ -2,24 +2,13 @@
 declare(strict_types=1);
 namespace App\Controller;
 
-use App\Entity\Job;
 use App\Entity\User;
-use App\Event\Enum\JobEventEnum;
-use App\Event\JobStartEvent;
-use App\Event\JobStopEvent;
-use function explode;
-use function intval;
-use function is_null;
-use function json_decode;
-use const PHP_EOL;
-use function pi;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use function json_decode;
 
 class SecurityController extends GenericController
 {
@@ -57,9 +46,6 @@ class SecurityController extends GenericController
      * @Route(
      *     name="get_profile",
      *     path="/api/profile",
-     *     defaults={
-     *          "_api_item_operation_name"="get_profile"
-     *     }
      * )
      * @Method("GET")
      *
@@ -68,20 +54,8 @@ class SecurityController extends GenericController
     public function getProfileAction()
     {
         /** @var User $user */
-        $user = $this->getRepository()->find(1);
-        return $this->serializeObject($user);
-    }
+        $user = $this->getRepository()->findAll()[0];
 
-    /**
-     * @param mixed $sensor
-     *
-     * @return Response
-     */
-    private function serializeObject($sensor): Response
-    {
-        $response = new Response($this->getSerializer()->serialize($sensor, 'json'));
-        $response->headers->set('Content-Type', 'application/json');
-
-        return $response;
+        return $this->serializeObject($user, ['user']);
     }
 }

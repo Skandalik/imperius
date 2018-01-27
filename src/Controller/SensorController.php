@@ -5,10 +5,10 @@ namespace App\Controller;
 use App\Entity\Sensor;
 use App\Type\SensorStateEnumType;
 use App\Util\SensorManager\SensorMosquittoPublisher;
-use function intval;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Response;
+use function intval;
 use function strval;
 
 class SensorController extends GenericController
@@ -38,7 +38,7 @@ class SensorController extends GenericController
 
         $sensor->setStatus(intval($status));
 
-        return $this->serializeObject($sensor);
+        return $this->serializeObject($sensor, ['sensor']);
     }
 
     /**
@@ -62,7 +62,7 @@ class SensorController extends GenericController
         $sensor = $this->getRepository()->find($id);
         $publisher->publishSetSensorStatus($sensor, strval(SensorStateEnumType::getFlippedValue($status)));
 
-        return $this->serializeObject($sensor);
+        return $this->serializeObject($sensor, ["sensor"]);
     }
 
     /**
@@ -86,7 +86,7 @@ class SensorController extends GenericController
         $sensor = $this->getRepository()->find($id);
         $publisher->publishCheckSensorStatus($sensor);
 
-        return $this->serializeObject($sensor);
+        return $this->serializeObject($sensor["sensor"]);
     }
 
     /**
@@ -106,21 +106,6 @@ class SensorController extends GenericController
     {
         $publisher->publishCheckAllSensorsStatus();
 
-        return $this->serializeObject($this->getRepository()->findAll());
-    }
-
-    /**
-     * @param mixed $sensor
-     *
-     * @return Response
-     */
-    private
-    function serializeObject(
-        $sensor
-    ): Response {
-        $response = new Response($this->getSerializer()->serialize($sensor, 'json'));
-        $response->headers->set('Content-Type', 'application/json');
-
-        return $response;
+        return $this->serializeObject($this->getRepository()->findAll(), ["sensor"]);
     }
 }

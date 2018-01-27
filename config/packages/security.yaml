@@ -31,7 +31,7 @@ security:
                 require_previous_session:   false
 
         api:
-            pattern:   ^/api
+            pattern:   ^/api/
             stateless: true
             guard:
                 authenticators:
@@ -39,7 +39,13 @@ security:
 
     access_control:
         - { path: ^/api/login, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/profile, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/jobs, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/sensors, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/rooms, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/manual_behaviors, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/scheduled_behaviors, role: IS_AUTHENTICATED_FULLY }
 
     role_hierarchy:
         ROLE_ADMIN: [ROLE_USER, ROLE_ADMIN]

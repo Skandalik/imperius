@@ -8,7 +8,6 @@ use App\Event\JobInterruptEvent;
 use App\Event\JobRunningEvent;
 use App\Event\JobStartEvent;
 use App\Event\JobStopEvent;
-use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -54,26 +53,21 @@ class JobController extends GenericController
         $event = new JobStartEvent($job, intval($process->getOutput()));
         $eventDispatcher->dispatch(JobEventEnum::JOB_START, $event);
 
-        return $this->serializeObject($job);
+        return $this->serializeObject($job, ['job']);
     }
 
     /**
      * @Route(
      *     name="check_job",
-     *     path="/api/jobs/check",
-     *     requirements={"id"="\d+"},
+     *     path="/api/jobs/check"
      * )
      * @Method("GET")
      * @param EventDispatcherInterface $eventDispatcher
      *
-     * @param EntityManagerInterface   $entityManager
-     *
      * @return Response
      */
-    public function areJobsRunningAction(
-        EventDispatcherInterface $eventDispatcher,
-        EntityManagerInterface $entityManager
-    ) {
+    public function areJobsRunningAction(EventDispatcherInterface $eventDispatcher)
+    {
         $jobs = $this->getRepository()->findAll();
 
         /** @var Job $job */
@@ -124,7 +118,7 @@ class JobController extends GenericController
         $event = new JobStopEvent($job, null);
         $eventDispatcher->dispatch(JobEventEnum::JOB_STOP, $event);
 
-        return $this->serializeObject($job);
+        return $this->serializeObject($job, ['job']);
     }
 
     /**
@@ -157,18 +151,5 @@ class JobController extends GenericController
         $output = explode(PHP_EOL, trim($process->getOutput()));
 
         return isset($output[1]);
-    }
-
-    /**
-     * @param mixed $sensor
-     *
-     * @return Response
-     */
-    private function serializeObject($sensor): Response
-    {
-        $response = new Response($this->getSerializer()->serialize($sensor, 'json'));
-        $response->headers->set('Content-Type', 'application/json');
-
-        return $response;
     }
 }

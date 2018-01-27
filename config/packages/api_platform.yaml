@@ -11,8 +11,6 @@ api_platform:
     swagger:
          api_keys:
              - { name: 'Authorization', type: 'header' }
-    http_cache:
-        max_age: 0
-        shared_max_age: 3600
-        vary: ['Content-Type', 'Authorization']
-        public: true
+    formats:
+            json:
+                mime_types: ['application/json']
