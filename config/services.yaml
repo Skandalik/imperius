@@ -66,3 +66,7 @@ services:
     App\Util\ManualBehavior\ManualBehaviorManager:
         tags:
             - { name: kernel.event_listener, event: sensor.check, method: checkSensor }
+
+    App\Util\ScheduledBehavior\ScheduledBehaviorManager:
+        tags:
+            - { name: kernel.event_listener, event: scheduled_task.execute, method: execute }

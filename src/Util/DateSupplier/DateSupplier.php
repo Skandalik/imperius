@@ -10,13 +10,14 @@ use function explode;
 class DateSupplier
 {
     /**
-     * @param bool   $isRepeatable
-     * @param string $date
-     * @param string $time
+     * @param bool          $isRepeatable
+     * @param string        $date
+     * @param string        $time
+     * @param DateTime | null $lastRunAt
      *
      * @return DateTime
      */
-    public function convertRelativeDate(bool $isRepeatable, string $date, string $time)
+    public function convertRelativeDate(bool $isRepeatable, string $date, string $time, $lastRunAt = null)
     {
         if (!empty($time)) {
             $timeWords = explode(':', $time);
@@ -24,15 +25,17 @@ class DateSupplier
 
         if ($isRepeatable) {
             if ('today' === $date) {
-                $repeatableDate = new DateTime($date);
-            }
-            elseif ('tomorrow' === $date) {
+                if ($lastRunAt) {
+                    $repeatableDate = new DateTime( 'tomorrow');
+                } else {
+                    $repeatableDate = new DateTime($date);
+                }
+            } elseif ('tomorrow' === $date) {
                 $repeatableDate = new DateTime($date);
             } else {
                 $repeatableDate = new DateTime('next ' . $date);
             }
             $repeatableDate->setTime((int) $timeWords[0], (int) $timeWords[1]);
-
             return $repeatableDate;
         }
 
@@ -63,7 +66,12 @@ class DateSupplier
 
             return $scheduledBehavior;
         }
-        $nextRun = $this->convertRelativeDate($scheduledBehavior->isRepeatable(), $scheduledBehavior->getRelativeDate(), $scheduledBehavior->getTime());
+        $nextRun = $this->convertRelativeDate(
+            $scheduledBehavior->isRepeatable(),
+            $scheduledBehavior->getRelativeDate(),
+            $scheduledBehavior->getTime(),
+            $scheduledBehavior->getLastRunAt()
+        );
         $scheduledBehavior->setNextRunAt($nextRun);
 
         return $scheduledBehavior;

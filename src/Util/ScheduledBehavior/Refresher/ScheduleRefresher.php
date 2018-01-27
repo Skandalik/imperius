@@ -31,9 +31,6 @@ class ScheduleRefresher
     {
         $scheduledBehavior->setLastRunAt($this->dateSupplier->getNowDate());
         $this->dateSupplier->setNextRunDate($scheduledBehavior);
-
-        $this->entityManager->flush();
-        $this->entityManager->clear();
     }
 
 }
