@@ -15,6 +15,7 @@ services:
             - imperius
         ports:
             - 8089:8081
+            - 8090:80
         volumes_from:
             - code
 
@@ -66,17 +67,6 @@ services:
         networks:
             - imperius
 
-    varnish:
-        container_name: varnish.imperius.home
-        build: ./docker/varnish
-        networks:
-            - imperius
-        volumes_from:
-            - code
-        ports:
-            - 8090:80
-        depends_on:
-            - web
 volumes:
     imperius:
         external: true
