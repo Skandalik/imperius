@@ -17,8 +17,6 @@ class SensorRepository extends EntityRepository
         try {
             return $qb->getQuery()->getOneOrNullResult();
         } catch (NonUniqueResultException $e) {
-            echo "elo";
-
             return null;
         }
     }

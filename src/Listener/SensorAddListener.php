@@ -24,7 +24,6 @@ class SensorAddListener
 
     public function onSensorAdd(SensorAddEvent $event)
     {
-        echo "Sensor " . $event->getEntity()->getUuid() . ' has been registered sucessfully.';
         $this->entityManager->persist($event->getEntity());
         $this->entityManager->flush();
         $this->entityManager->clear();

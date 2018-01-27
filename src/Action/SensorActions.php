@@ -24,8 +24,6 @@ class SensorActions extends Controller
      */
     public function getStatusAction(Request $request)
     {
-        echo "lol";
-
         return $request;
     }
 
@@ -44,8 +42,6 @@ class SensorActions extends Controller
      */
     public function setStatusAction(Request $request)
     {
-        echo "lol";
-
         return $request;
     }
 }

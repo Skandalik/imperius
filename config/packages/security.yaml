@@ -7,15 +7,14 @@ security:
 #    providers:
 #        in_memory: { memory: ~ }
 #TODO fix security
-    providers:
-        in_memory:
-            memory:
-                users:
-                    hugon:
-                        password: hugon
-                        roles: 'ROLE_ADMIN'
     encoders:
-        Symfony\Component\Security\Core\User\User: plaintext
+        App\Entity\User:
+            algorithm: bcrypt
+    providers:
+        db_provider:
+            entity:
+                class: App\Entity\User
+                property: username
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt|error)|css|images|js)/
@@ -24,6 +23,7 @@ security:
             pattern: ^/api/login
             stateless: true
             anonymous: true
+            provider: db_provider
             json_login:
                 check_path:                 /api/login_check
                 success_handler:            lexik_jwt_authentication.handler.authentication_success

@@ -53,19 +53,12 @@ RUN pecl install Mosquitto-alpha \
 # Memory Limit
 RUN echo "memory_limit=-1" > /etc/php7/conf.d/memory-limit.ini
 
-RUN echo "zend_extension=/usr/lib/php7/modules/xdebug.so" >> /etc/php7/conf.d/xdebug.ini \
-    && echo "xdebug.remote_port=9001" >> /etc/php7/conf.d/xdebug.ini \
-    && echo "xdebug.remote_enable=1" >> /etc/php7/conf.d/xdebug.ini \
-    && echo "xdebug.remote_autostart=1" >> /etc/php7/conf.d/xdebug.ini \
-    && echo "xdebug.remote_connect_back=0" >> /etc/php7/conf.d/xdebug.ini \
-    && echo "xdebug.remote_host=docker.for.mac.localhost" >> /etc/php7/conf.d/xdebug.ini
+RUN rm /etc/php7/conf.d/xdebug.ini
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php \
     && php -r "unlink('composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer
-
-ENV PHP_IDE_CONFIG="serverName=imperius"
 
 WORKDIR /code
 

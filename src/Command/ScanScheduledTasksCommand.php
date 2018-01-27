@@ -3,19 +3,21 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Entity\ScheduledBehavior;
+use App\Event\Enum\ScheduledTaskEventEnum;
+use App\Event\JobInterruptEvent;
+use App\Event\ScheduledTaskExecuteEvent;
 use App\Repository\ScheduledBehaviorRepository;
-use App\Util\ScheduledBehavior\ScheduledBehaviorManager;
 use Doctrine\ORM\EntityManagerInterface;
-use function sleep;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Process\Process;
 use function usleep;
 
 class ScanScheduledTasksCommand extends ContainerAwareCommand
 {
+    const SENSORS_SCHEDULED = 'sensors:scheduled';
 
     /** @var EventDispatcherInterface */
     private $eventDispatcher;
@@ -26,60 +28,49 @@ class ScanScheduledTasksCommand extends ContainerAwareCommand
     /** @var ScheduledBehaviorRepository */
     private $repository;
 
-    /** @var ScheduledBehaviorManager */
-    private $scheduleExecutor;
-
-    /** @var bool  */
-    private $inLoop = true;
-
     public function __construct(
         $name = null,
         EventDispatcherInterface $eventDispatcher,
-        EntityManagerInterface $entityManager,
-        ScheduledBehaviorManager $scheduleExecutor
+        EntityManagerInterface $entityManager
     ) {
         parent::__construct($name);
         $this->eventDispatcher = $eventDispatcher;
         $this->entityManager = $entityManager;
-        $this->scheduleExecutor = $scheduleExecutor;
-    }
-
-    public function stop()
-    {
-        $this->inLoop = false;
     }
 
     protected function configure()
     {
-        $this->setName('sensors:scheduled');
-    }
-
-    protected function initialize(InputInterface $input, OutputInterface $output)
-    {
-        $this->repository = $this->entityManager->getRepository(ScheduledBehavior::class);
+        $this->setName(self::SENSORS_SCHEDULED);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln("Start scanning scheduled tasks");
 
-        pcntl_signal(SIGTERM, [$this, 'stop']);
-        pcntl_signal(SIGINT, [$this, 'stop']);
-
-
         $output->writeln("Fetching database");
-        while ($this->inLoop) {
-            pcntl_signal_dispatch();
-            $schedulers = $this->repository->findAllNotFinished();
-            $output->writeln("Number of schedulers: " . count($schedulers));
-            /** @var ScheduledBehavior $scheduled */
-            foreach ($schedulers as $scheduled) {
-                $this->scheduleExecutor->execute($scheduled);
+        $this->repository = $this->entityManager->getRepository(ScheduledBehavior::class);
+        try {
+            while (true) {
+                $this->entityManager->flush();
+                $this->entityManager->clear();
+                $schedulers = $this->repository->findAllNotFinished();
+                $output->writeln("Number of schedulers: " . count($schedulers));
+                /** @var ScheduledBehavior $scheduled */
+                foreach ($schedulers as $scheduled) {
+                    $output->writeln(
+                        'Next run for ' . $scheduled->getSensor()->getUuid() . ': ' . date_format(
+                            $scheduled->getNextRunAt(),
+                            'Y-m-d H:i:s'
+                        )
+                    );
+                    $event = new ScheduledTaskExecuteEvent($scheduled);
+                    $this->eventDispatcher->dispatch(ScheduledTaskEventEnum::SCHEDULED_TASK_EXECUTE, $event);
+                }
+                usleep(5000000);
             }
-            sleep(5);
+        } catch (Exception $exception) {
+            $event = new JobInterruptEvent(self::SENSORS_SCHEDULED);
+            $this->eventDispatcher->dispatch(JobInterruptEvent::NAME, $event);
         }
-
-        $output->writeln("Exiting gracefully...");
-        return 0;
     }
 }

@@ -8,8 +8,8 @@ use App\Entity\Traits\IdentityAutoTrait;
 use App\Util\DateSupplier\DateSupplier;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
-use function is_null;
 use Symfony\Component\Serializer\Annotation\Groups;
+use function is_null;
 
 /**
  * @ApiResource(
@@ -28,7 +28,7 @@ class ScheduledBehavior implements BehaviorInterface
     /**
      * @var Sensor
      *
-     * @ORM\ManyToOne(targetEntity="Sensor", inversedBy="scheduledBehaviors", cascade={"persist", "refresh"})
+     * @ORM\ManyToOne(targetEntity="Sensor", inversedBy="scheduledBehaviors")
      * @ORM\JoinColumn(name="sensor_id", referencedColumnName="id", nullable=false)
      * @Groups({"scheduled"})
      */
@@ -121,13 +121,14 @@ class ScheduledBehavior implements BehaviorInterface
      */
     public function prePersist()
     {
+        $this->setFinished(false);
         $this->setUpdatedAt(new DateTime());
 
         if (is_null($this->createdAt)) {
             $this->setCreatedAt(new DateTime());
         }
         $date = new DateSupplier();
-        $this->setNextRunAt($date->convertRelativeDate($this->isRepeatable(), $this->getRelativeDate(), $this->getTime()));
+        $this->setNextRunAt($date->convertRelativeDate($this->isRepeatable(), $this->getRelativeDate(), $this->getTime(), $this->getLastRunAt()));
     }
 
     /**
@@ -245,7 +246,7 @@ class ScheduledBehavior implements BehaviorInterface
      */
     public function getNextRunAt()
     {
-        return is_null($this->nextRunAt) ? null : date_format($this->nextRunAt, 'Y-m-d H:i');
+        return $this->nextRunAt;
     }
 
     /**

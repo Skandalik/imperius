@@ -50,16 +50,9 @@ class Job
      * @var DateTime
      *
      * @ORM\Column(name="last_run_at", type="datetime", nullable=true)
-     */
-    private $lastRunAt;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="time", type="string", nullable=false)
      * @Groups({"job"})
      */
-    private $time;
+    private $lastRunAt;
 
     /**
      * @var bool
@@ -76,14 +69,6 @@ class Job
      * @Groups({"job"})
      */
     private $error;
-
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="repeatable", type="boolean", nullable=false)
-     * @Groups({"job"})
-     */
-    private $repeatable;
 
     /**
      * @var bool
@@ -142,22 +127,6 @@ class Job
     }
 
     /**
-     * @return string
-     */
-    public function getTime(): string
-    {
-        return $this->time;
-    }
-
-    /**
-     * @param string $time
-     */
-    public function setTime(string $time)
-    {
-        $this->time = $time;
-    }
-
-    /**
      * @return bool | null
      */
     public function isRunning()
@@ -195,22 +164,6 @@ class Job
         $this->error = $error;
 
         return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isRepeatable(): bool
-    {
-        return $this->repeatable;
-    }
-
-    /**
-     * @param bool $repeatable
-     */
-    public function setRepeatable(bool $repeatable)
-    {
-        $this->repeatable = $repeatable;
     }
 
     /**
@@ -270,11 +223,11 @@ class Job
     }
 
     /**
-     * @return DateTime
+     * @return DateTime | null
      */
-    public function getLastRunAt(): DateTime
+    public function getLastRunAt()
     {
-        return $this->lastRunAt;
+        return is_null($this->lastRunAt) ? null : date_format($this->lastRunAt, 'Y-m-d H:i');
     }
 
     /**

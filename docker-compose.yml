@@ -6,7 +6,7 @@ services:
         networks:
             - imperius
         volumes:
-            - imperius:/code:nocopy
+            - imperius:/code
 
     web:
         container_name: web.imperius.home
@@ -14,6 +14,7 @@ services:
         networks:
             - imperius
         ports:
+            - 8089:81
             - 8090:80
         volumes_from:
             - code
@@ -21,12 +22,28 @@ services:
     php-fpm:
         container_name: php-fpm.imperius.home
         build: ./docker/php-fpm
+        entrypoint:
+            - "entrypoint.sh"
+            - "php-fpm"
         networks:
             - imperius
         volumes_from:
-            - code
+            - code:delegated
+
+    php-fpm-xdebug:
+        container_name: php-fpm-xdebug.imperius.home
+        build: ./docker/php-fpm
+        entrypoint:
+            - "entrypoint.sh"
+            - "php-fpm"
+            - "-F"
+            - "-c"
+            - "/xdebug.ini"
+        networks:
+            - imperius
+        volumes_from:
+            - code:delegated
         expose:
-          - 9000
           - 9001
 
     mysql:
@@ -49,6 +66,7 @@ services:
         build: ./docker/redis
         networks:
             - imperius
+
 volumes:
     imperius:
         external: true

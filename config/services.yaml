@@ -45,7 +45,7 @@ services:
 
     App\Listener\SensorDeleteListener:
         tags:
-            - { name: kernel.event_listener, event: sensor.delete }
+            - { name: doctrine.event_listener, event: preRemove }
 
     App\Listener\SensorDisconnectListener:
         tags:
@@ -55,10 +55,22 @@ services:
         tags:
             - { name: kernel.event_listener, event: job.start }
 
+    App\Listener\JobStopListener:
+        tags:
+            - { name: kernel.event_listener, event: job.stop }
+
     App\Listener\JobInterruptListener:
         tags:
             - { name: kernel.event_listener, event: job.interrupt }
 
+    App\Listener\JobRunningListener:
+        tags:
+            - { name: kernel.event_listener, event: job.running }
+
     App\Util\ManualBehavior\ManualBehaviorManager:
         tags:
             - { name: kernel.event_listener, event: sensor.check, method: checkSensor }
+
+    App\Util\ScheduledBehavior\ScheduledBehaviorManager:
+        tags:
+            - { name: kernel.event_listener, event: scheduled_task.execute, method: execute }
