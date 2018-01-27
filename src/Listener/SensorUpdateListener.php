@@ -5,10 +5,10 @@ namespace App\Listener;
 use App\Entity\Sensor;
 use App\Event\SensorUpdateEvent;
 use App\Repository\SensorRepository;
-use App\Type\SensorStateEnumType;
-use function boolval;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use function in_array;
+use Redis;
+use function date_format;
 
 class SensorUpdateListener
 {
@@ -18,18 +18,26 @@ class SensorUpdateListener
     /** @var EntityManagerInterface */
     private $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    /** @var Redis */
+    private $redis;
+
+    public function __construct(Redis $redis, EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
         $this->sensorRepository = $this->entityManager->getRepository(Sensor::class);
+        $this->redis = $redis;
     }
 
+    /**
+     * @param SensorUpdateEvent $event
+     */
     public function onSensorUpdate(SensorUpdateEvent $event)
     {
         /** @var Sensor $sensor */
         $sensor = $this->sensorRepository->findByUuid($event->getUuid());
         $data = (int) $event->getData();
         $this->setStatusOrState($sensor, $data);
+        $this->saveToRedis($sensor, $event);
 
         $this->entityManager->persist($sensor);
         $this->entityManager->flush();
@@ -37,6 +45,12 @@ class SensorUpdateListener
         return;
     }
 
+    /**
+     * @param Sensor $sensor
+     * @param        $data
+     *
+     * @return Sensor
+     */
     private function setStatusOrState(Sensor $sensor, $data)
     {
         if (!$sensor->isFetchable()) {
@@ -45,4 +59,12 @@ class SensorUpdateListener
         return $sensor->setStatus($data);
     }
 
+    /**
+     * @param Sensor            $sensor
+     * @param SensorUpdateEvent $event
+     */
+    private function saveToRedis(Sensor $sensor, SensorUpdateEvent $event)
+    {
+        $this->redis->hSet($sensor->getUuid(), date_format(new DateTime(), "Y-m-d_H:i:s"), $event->getData());
+    }
 }

@@ -11,6 +11,13 @@ api_platform:
     swagger:
          api_keys:
              - { name: 'Authorization', type: 'header' }
+    # Enable the Swagger documentation and export.
+    enable_swagger: true
+
+    # Enable Swagger ui.
+    enable_swagger_ui: true
     formats:
-            json:
-                mime_types: ['application/json']
+        json:
+            mime_types: ['application/json']
+        html:
+            mime_types: ['text/html']

@@ -86,7 +86,7 @@ class SensorController extends GenericController
         $sensor = $this->getRepository()->find($id);
         $publisher->publishCheckSensorStatus($sensor);
 
-        return $this->serializeObject($sensor["sensor"]);
+        return $this->serializeObject($sensor, ["sensor"]);
     }
 
     /**

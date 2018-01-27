@@ -42,6 +42,8 @@ services:
     App\Listener\SensorUpdateListener:
         tags:
             - { name: kernel.event_listener, event: sensor.update }
+        arguments:
+            - "@snc_redis.sensor_api"
 
     App\Listener\SensorDeleteListener:
         tags:
