@@ -28,7 +28,7 @@ class ScheduledBehavior implements BehaviorInterface
     /**
      * @var Sensor
      *
-     * @ORM\ManyToOne(targetEntity="Sensor", inversedBy="scheduledBehaviors", cascade={"persist", "refresh"})
+     * @ORM\ManyToOne(targetEntity="Sensor", inversedBy="scheduledBehaviors")
      * @ORM\JoinColumn(name="sensor_id", referencedColumnName="id", nullable=false)
      * @Groups({"scheduled"})
      */

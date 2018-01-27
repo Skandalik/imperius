@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Sensor;
 use App\Repository\Abstraction\BehaviorRepository;
 
 /**
@@ -12,4 +13,16 @@ use App\Repository\Abstraction\BehaviorRepository;
  */
 class ManualBehaviorRepository extends BehaviorRepository
 {
+    /**
+     * @return array
+     */
+    public function findAllByActionSensor(Sensor $sensor): array
+    {
+        $qb = $this->createQueryBuilder('mb');
+        $qb->where('mb.actionSensor = :sensor')
+            ->setParameter('sensor', $sensor)
+        ;
+
+        return $qb->getQuery()->getResult();
+    }
 }

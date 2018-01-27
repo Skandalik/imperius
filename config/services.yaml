@@ -45,7 +45,7 @@ services:
 
     App\Listener\SensorDeleteListener:
         tags:
-            - { name: kernel.event_listener, event: sensor.delete }
+            - { name: doctrine.event_listener, event: preRemove }
 
     App\Listener\SensorDisconnectListener:
         tags:

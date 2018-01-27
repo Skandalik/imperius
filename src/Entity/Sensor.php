@@ -8,6 +8,7 @@ use App\Entity\Traits\IdentityAutoTrait;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use function sprintf;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -136,7 +137,7 @@ class Sensor
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="ManualBehavior", mappedBy="sensor", orphanRemoval=true, cascade={"persist", "refresh"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="ManualBehavior", mappedBy="sensor", orphanRemoval=true)
      * @Groups({"sensor"})
      * @ApiSubresource()
      */
@@ -145,7 +146,7 @@ class Sensor
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="ScheduledBehavior", mappedBy="sensor", orphanRemoval=true, cascade={"persist", "refresh"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="ScheduledBehavior", mappedBy="sensor", orphanRemoval=true)
      * @Groups({"sensor"})
      * @ApiSubresource()
      */
@@ -167,6 +168,7 @@ class Sensor
             ->setCreatedAt(null)
         ;
         $this->manualBehaviors = new ArrayCollection();
+        $this->scheduledBehaviors = new ArrayCollection();
     }
 
     /**
@@ -483,7 +485,7 @@ class Sensor
      *
      * @return Sensor
      */
-    public function addBehavior(ManualBehavior $behavior)
+    public function addManualBehavior(ManualBehavior $behavior)
     {
         if (!$this->manualBehaviors->contains($behavior)) {
             return $this;
@@ -497,11 +499,12 @@ class Sensor
     /**
      * @param ManualBehavior $behavior
      */
-    public function removeBehavior(ManualBehavior $behavior)
+    public function removeManualBehavior(ManualBehavior $behavior)
     {
         $this->manualBehaviors->removeElement($behavior);
         $behavior->setSensor(null);
     }
+
     /**
      * @return ArrayCollection | ScheduledBehavior[]
      */

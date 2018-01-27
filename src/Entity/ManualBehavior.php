@@ -26,7 +26,7 @@ class ManualBehavior implements BehaviorInterface
     /**
      * @var Sensor
      *
-     * @ORM\ManyToOne(targetEntity="Sensor", inversedBy="manualBehaviors", cascade={"persist", "refresh"})
+     * @ORM\ManyToOne(targetEntity="Sensor", inversedBy="manualBehaviors")
      * @ORM\JoinColumn(name="sensor_id", referencedColumnName="id", nullable=false)
      * @Groups({"manual"})
      */
@@ -51,7 +51,7 @@ class ManualBehavior implements BehaviorInterface
     /**
      * @var Sensor
      *
-     * @ORM\ManyToOne(targetEntity="Sensor", cascade={"persist", "refresh"})
+     * @ORM\ManyToOne(targetEntity="Sensor")
      * @ORM\JoinColumn(name="action_sensor_id", referencedColumnName="id", nullable=false)
      * @Groups({"manual"})
      */
@@ -99,6 +99,16 @@ class ManualBehavior implements BehaviorInterface
     public function removeSourceSensor()
     {
         $this->setSensor(new Sensor());
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function removeActionSensor()
+    {
+        $this->setActionSensor(new Sensor());
 
         return $this;
     }
