@@ -63,6 +63,10 @@ services:
         tags:
             - { name: kernel.event_listener, event: job.interrupt }
 
+    App\Listener\JobRunningListener:
+        tags:
+            - { name: kernel.event_listener, event: job.running }
+
     App\Util\ManualBehavior\ManualBehaviorManager:
         tags:
             - { name: kernel.event_listener, event: sensor.check, method: checkSensor }
