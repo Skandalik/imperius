@@ -3,12 +3,11 @@ declare(strict_types=1);
 namespace App\Listener;
 
 use App\Entity\Job;
-use App\Event\JobStartEvent;
 use App\Event\JobStopEvent;
 use App\Repository\JobRepository;
+use App\Util\MonitoringService\StatsManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 
 class JobStopListener
 {
@@ -18,14 +17,14 @@ class JobStopListener
     /** @var EntityManagerInterface */
     private $entityManager;
 
-    /** @var LoggerInterface */
-    private $logger;
+    /** @var StatsManager */
+    private $stats;
 
-    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger)
+    public function __construct(EntityManagerInterface $entityManager, StatsManager $stats)
     {
         $this->entityManager = $entityManager;
         $this->jobRepository = $this->entityManager->getRepository(Job::class);
-        $this->logger = $logger;
+        $this->stats = $stats;
     }
 
     public function onJobStop(JobStopEvent $event)
@@ -38,6 +37,9 @@ class JobStopListener
         $job->setLastRunAt(new DateTime());
         $this->entityManager->flush();
         $this->entityManager->clear();
+
+        $this->stats->setStatName('job');
+        $this->stats->event(['action' => 'stop', 'name' => $job->getName()]);
 
         return;
     }

@@ -5,6 +5,7 @@ namespace App\Listener;
 use App\Entity\Sensor;
 use App\Event\SensorUpdateEvent;
 use App\Repository\SensorRepository;
+use App\Util\MonitoringService\StatsManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Redis;
@@ -12,6 +13,9 @@ use function date_format;
 
 class SensorUpdateListener
 {
+    /** @var string */
+    private $type = "";
+
     /** @var SensorRepository */
     private $sensorRepository;
 
@@ -21,11 +25,18 @@ class SensorUpdateListener
     /** @var Redis */
     private $redis;
 
-    public function __construct(Redis $redis, EntityManagerInterface $entityManager)
-    {
+    /** @var StatsManager */
+    private $stats;
+
+    public function __construct(
+        Redis $redis,
+        EntityManagerInterface $entityManager,
+        StatsManager $stats
+    ) {
         $this->entityManager = $entityManager;
         $this->sensorRepository = $this->entityManager->getRepository(Sensor::class);
         $this->redis = $redis;
+        $this->stats = $stats;
     }
 
     /**
@@ -42,6 +53,18 @@ class SensorUpdateListener
         $this->entityManager->persist($sensor);
         $this->entityManager->flush();
 
+        $this->setStatType($sensor);
+        $this->stats->setStatName('sensor');
+        $this->stats->event(['action' => 'update']);
+        $this->stats->gauge(
+            [
+                'type'      => $this->type,
+                'data_type' => $sensor->getDataType(),
+                'uuid'      => $sensor->getUuid(),
+            ],
+            $data
+        );
+
         return;
     }
 
@@ -56,6 +79,7 @@ class SensorUpdateListener
         if (!$sensor->isFetchable()) {
             $sensor->setActive(!($data === 0));
         }
+
         return $sensor->setStatus($data);
     }
 
@@ -66,5 +90,19 @@ class SensorUpdateListener
     private function saveToRedis(Sensor $sensor, SensorUpdateEvent $event)
     {
         $this->redis->hSet($sensor->getUuid(), date_format(new DateTime(), "Y-m-d_H:i:s"), $event->getData());
+    }
+
+    /**
+     * @param Sensor $sensor
+     */
+    private function setStatType(Sensor $sensor)
+    {
+        if ($sensor->isFetchable()) {
+            $this->type = 'fetch';
+        } elseif ($sensor->isAdjustable()) {
+            $this->type = 'adjust';
+        } elseif ($sensor->isSwitchable()) {
+            $this->type = 'switch';
+        }
     }
 }

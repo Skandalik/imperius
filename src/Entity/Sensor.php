@@ -8,7 +8,6 @@ use App\Entity\Traits\IdentityAutoTrait;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use function sprintf;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -99,6 +98,14 @@ class Sensor
     private $status;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="data_type", type="string", nullable=false)
+     * @Groups({"sensor"})
+     */
+    private $dataType;
+
+    /**
      * @var bool
      *
      * @ORM\Column(name="active", type="boolean", nullable=false)
@@ -181,6 +188,10 @@ class Sensor
 
         if (is_null($this->getCreatedAt())) {
             $this->setCreatedAt(new DateTime());
+        }
+
+        if (empty($this->getDataType())) {
+            $this->setDataType('none');
         }
     }
 
@@ -559,5 +570,21 @@ class Sensor
     public function __toString()
     {
         return $this->getUuid();
+    }
+
+    /**
+     * @return string
+     */
+    public function getDataType(): string
+    {
+        return $this->dataType;
+    }
+
+    /**
+     * @param string $dataType
+     */
+    public function setDataType(string $dataType)
+    {
+        $this->dataType = $dataType;
     }
 }

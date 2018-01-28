@@ -5,8 +5,9 @@ namespace App\Listener;
 use App\Entity\Sensor;
 use App\Event\SensorDisconnectEvent;
 use App\Repository\SensorRepository;
-use function boolval;
+use App\Util\MonitoringService\StatsManager;
 use Doctrine\ORM\EntityManagerInterface;
+use function boolval;
 
 class SensorDisconnectListener
 {
@@ -16,10 +17,14 @@ class SensorDisconnectListener
     /** @var EntityManagerInterface */
     private $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    /** @var StatsManager */
+    private $stats;
+
+    public function __construct(EntityManagerInterface $entityManager, StatsManager $stats)
     {
         $this->entityManager = $entityManager;
         $this->sensorRepository = $this->entityManager->getRepository(Sensor::class);
+        $this->stats = $stats;
     }
 
     public function onSensorUpdate(SensorDisconnectEvent $event)
@@ -32,6 +37,9 @@ class SensorDisconnectListener
         $this->entityManager->persist($sensor);
         $this->entityManager->flush();
         $this->entityManager->clear();
+
+        $this->stats->setStatName('sensor');
+        $this->stats->event(['action' => 'disconnect', 'uuid' => $sensor->getUuid(),]);
 
         return;
     }

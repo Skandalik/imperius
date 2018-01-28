@@ -5,8 +5,8 @@ namespace App\Listener;
 use App\Entity\Job;
 use App\Event\JobInterruptEvent;
 use App\Repository\JobRepository;
+use App\Util\MonitoringService\StatsManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 
 class JobInterruptListener
 {
@@ -16,14 +16,14 @@ class JobInterruptListener
     /** @var EntityManagerInterface */
     private $entityManager;
 
-    /** @var LoggerInterface */
-    private $logger;
+    /** @var StatsManager */
+    private $stats;
 
-    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger)
+    public function __construct(EntityManagerInterface $entityManager, StatsManager $stats)
     {
         $this->entityManager = $entityManager;
         $this->jobRepository = $this->entityManager->getRepository(Job::class);
-        $this->logger = $logger;
+        $this->stats = $stats;
     }
 
     public function onJobInterrupt(JobInterruptEvent $event)
@@ -35,6 +35,9 @@ class JobInterruptListener
         $job->setJobPid(null);
         $this->entityManager->flush();
         $this->entityManager->clear();
+
+        $this->stats->setStatName('job');
+        $this->stats->event(['action' => 'interrupt', 'name' => $job->getName()]);
 
         return;
     }

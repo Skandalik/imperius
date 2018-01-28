@@ -4,10 +4,19 @@ namespace App\Listener;
 
 use App\Entity\ManualBehavior;
 use App\Entity\Sensor;
+use App\Util\MonitoringService\StatsManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 
 class SensorDeleteListener
 {
+    /** @var StatsManager */
+    private $stats;
+
+    public function __construct(StatsManager $stats)
+    {
+        $this->stats = $stats;
+    }
+
     public function preRemove(LifecycleEventArgs $eventArgs)
     {
         $entity = $eventArgs->getEntity();
@@ -21,6 +30,9 @@ class SensorDeleteListener
         foreach ($manualBehaviors as $manualBehavior) {
             $manualBehavior->getSensor()->removeManualBehavior($manualBehavior);
         }
+
+        $this->stats->setStatName('sensor');
+        $this->stats->event(['action' => 'delete', 'uuid' => $entity->getUuid(),]);
 
         return;
     }

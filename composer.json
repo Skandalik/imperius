@@ -8,6 +8,7 @@
         "friendsofsymfony/rest-bundle": "^2.3",
         "jms/serializer-bundle": "^2.3",
         "lexik/jwt-authentication-bundle": "^2.4",
+      "liuggio/statsd-client-bundle": "^1.6",
         "nakard/mosquitto-php-stub": "dev-master",
         "nelmio/cors-bundle": "^1.5",
         "pagerfanta/pagerfanta": "^1.0",

@@ -31,6 +31,10 @@ services:
         arguments:
             - '%env(MOSQUITTO_BROKER_HOST)%'
 
+    App\Util\MonitoringService\StatsManager:
+        arguments:
+            - "@statsd"
+
     App\Listener\SensorFoundListener:
         tags:
             - { name: kernel.event_listener, event: sensor.found }

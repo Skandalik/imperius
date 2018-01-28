@@ -5,8 +5,8 @@ namespace App\Listener;
 use App\Entity\Job;
 use App\Event\JobStartEvent;
 use App\Repository\JobRepository;
+use App\Util\MonitoringService\StatsManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 
 class JobStartListener
 {
@@ -16,14 +16,14 @@ class JobStartListener
     /** @var EntityManagerInterface */
     private $entityManager;
 
-    /** @var LoggerInterface */
-    private $logger;
+    /** @var StatsManager */
+    private $stats;
 
-    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger)
+    public function __construct(EntityManagerInterface $entityManager, StatsManager $stats)
     {
         $this->entityManager = $entityManager;
         $this->jobRepository = $this->entityManager->getRepository(Job::class);
-        $this->logger = $logger;
+        $this->stats = $stats;
     }
 
     public function onJobStart(JobStartEvent $event)
@@ -36,6 +36,9 @@ class JobStartListener
         $job->setJobPid($event->getPid());
         $this->entityManager->flush();
         $this->entityManager->clear();
+
+        $this->stats->setStatName('job');
+        $this->stats->event(['action' => 'start', 'name' => $job->getName()]);
 
         return;
     }

@@ -16,6 +16,7 @@ services:
         ports:
             - 8089:81
             - 8090:80
+            - 8888:8888
         volumes_from:
             - code
 
@@ -64,6 +65,50 @@ services:
     redis:
         container_name: redis.imperius.home
         build: ./docker/redis
+        networks:
+            - imperius
+
+
+    mysql-grafana:
+        container_name: mysql-grafana.imperius.home
+        build: ./docker/mysql-grafana
+        networks:
+            - imperius
+        environment:
+            - MYSQL_DATABASE=grafana
+            - MYSQL_USER=imperius-tools
+            - MYSQL_PASSWORD=imperius-tools-pass
+            - MYSQL_ROOT_PASSWORD=root
+
+    influxdb:
+        container_name: influxdb.imperius.home
+        build: ./docker/influxdb
+        networks:
+            - imperius
+        ports:
+            - 8086:8086
+            - 8083:8083
+            - 4444:4444
+
+    grafana:
+        container_name: grafana.imperius.home
+        build: ./docker/grafana
+        depends_on:
+            - mysql-grafana
+        restart: always
+        networks:
+            - imperius
+        ports:
+            - 3000:3000
+
+    telegraf:
+        container_name: telegraf.imperius.home
+        build: ./docker/telegraf
+        depends_on:
+            - grafana
+        restart: always
+        ports:
+            - 8125:8125
         networks:
             - imperius
 

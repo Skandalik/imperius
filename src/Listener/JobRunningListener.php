@@ -5,6 +5,7 @@ namespace App\Listener;
 use App\Entity\Job;
 use App\Event\JobRunningEvent;
 use App\Repository\JobRepository;
+use App\Util\MonitoringService\StatsManager;
 use Doctrine\ORM\EntityManagerInterface;
 
 class JobRunningListener
@@ -15,10 +16,14 @@ class JobRunningListener
     /** @var EntityManagerInterface */
     private $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    /** @var StatsManager */
+    private $stats;
+
+    public function __construct(EntityManagerInterface $entityManager, StatsManager $stats)
     {
         $this->entityManager = $entityManager;
         $this->jobRepository = $this->entityManager->getRepository(Job::class);
+        $this->stats = $stats;
     }
 
     public function onJobRunning(JobRunningEvent $event)
@@ -30,6 +35,9 @@ class JobRunningListener
         $job->setFinished(false);
         $this->entityManager->flush();
         $this->entityManager->clear();
+
+        $this->stats->setStatName('job');
+        $this->stats->event(['action' => 'running', 'name' => $job->getName()]);
 
         return;
     }
