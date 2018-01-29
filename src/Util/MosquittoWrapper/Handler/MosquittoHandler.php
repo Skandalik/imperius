@@ -4,6 +4,7 @@ namespace App\Util\MosquittoWrapper\Handler;
 
 use App\Util\MosquittoWrapper\Factory\MosquittoFactory;
 use Mosquitto\Client;
+use function is_null;
 
 class MosquittoHandler
 {
@@ -20,7 +21,6 @@ class MosquittoHandler
     {
         $this->mosquittoBroker = $mosquittoBroker;
         $this->mosquittoFactory = $mosquittoFactory;
-        $this->mosquittoClient = $this->mosquittoFactory->create();
     }
 
     public function connect(string $host = '')
@@ -39,11 +39,15 @@ class MosquittoHandler
     public function disconnect()
     {
         $this->mosquittoClient->disconnect();
-        unset($this->mosquittoClient);
+        $this->mosquittoClient = null;
     }
 
     public function getClient()
     {
+        if (is_null($this->mosquittoClient)) {
+            $this->mosquittoClient = $this->mosquittoFactory->create();
+        }
+
         return $this->mosquittoClient;
     }
 

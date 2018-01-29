@@ -17,10 +17,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use function array_key_exists;
+use function getenv;
 
 class ScanSensorsCommand extends ContainerAwareCommand
 {
-    const MQTT_BROKER = 'docker.for.mac.localhost';
+    //const MQTT_BROKER = 'docker.for.mac.localhost';
     const MQTT_BROKER_PORT = 1883;
     const MQTT_BROKER_KEEP_ALIVE = 30;
     const CLIENT_ID = 'imperius-sensor-scan-command';
@@ -38,7 +40,6 @@ class ScanSensorsCommand extends ContainerAwareCommand
         TopicEnum::SENSOR_STATUS_RESPONSE => 1,
         TopicEnum::SENSOR_RESPONSE        => 1,
         TopicEnum::SENSOR_LAST_WILL       => 1,
-        'exit'                            => 1,
     ];
 
     protected function configure()
@@ -76,8 +77,6 @@ class ScanSensorsCommand extends ContainerAwareCommand
             $client->onDisconnect(
                 function ($rc) use ($output, $client) {
                     $output->writeln('Disconnected. Failure with code: ' . $rc);
-                    $output->writeln('Connecting again.');
-                    //$this->connectMqttClient($client);
                 }
             );
 
@@ -106,6 +105,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
                                 (bool) $jsonMessage['switchable'],
                                 (bool) $jsonMessage['adjustable'],
                                 $jsonMessage['status'],
+                                $this->getType($jsonMessage),
                                 $this->getSensorValueRange($jsonMessage)
                             );
 
@@ -137,7 +137,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
             );
 
             $output->writeln("Connecting to an MQTT Broker on port " . self::MQTT_BROKER_PORT . '.');
-            $output->writeln("IP of MQTT Broker " . self::MQTT_BROKER . '.');
+            $output->writeln("IP of MQTT Broker " . getenv('MOSQUITTO_BROKER_HOST') . '.');
             $output->writeln("Keep Alive responding for this command client: " . self::MQTT_BROKER_KEEP_ALIVE . '.');
             $output->writeln("");
 
@@ -153,8 +153,13 @@ class ScanSensorsCommand extends ContainerAwareCommand
             $client->loopForever();
             $output->writeln('Exiting gracefully...');
         } catch (Exception $exception) {
-            $event = new JobInterruptEvent(self::SENSORS_SCAN);
-            $this->eventDispatcher->dispatch(JobInterruptEvent::NAME, $event);
+            $events = [];
+            $events[] = new JobInterruptEvent(self::SENSORS_SCAN);
+            $events[] = new JobInterruptEvent(ScanScheduledTasksCommand::SENSORS_SCHEDULED);
+            $events[] = new JobInterruptEvent(RefreshSensorsDataCommand::SENSORS_REFRESH);
+            foreach ($events as $event) {
+                $this->eventDispatcher->dispatch(JobInterruptEvent::NAME, $event);
+            }
         }
     }
 
@@ -163,7 +168,7 @@ class ScanSensorsCommand extends ContainerAwareCommand
      */
     protected function connectMqttClient($client): void
     {
-        $client->connect(self::MQTT_BROKER, self::MQTT_BROKER_PORT, self::MQTT_BROKER_KEEP_ALIVE);
+        $client->connect(getenv('MOSQUITTO_BROKER_HOST'), self::MQTT_BROKER_PORT, self::MQTT_BROKER_KEEP_ALIVE);
     }
 
     /**
@@ -181,5 +186,19 @@ class ScanSensorsCommand extends ContainerAwareCommand
         }
 
         return null;
+    }
+
+    /**
+     * @param array $jsonMessage
+     *
+     * @return string
+     */
+    private function getType(array $jsonMessage)
+    {
+        if (array_key_exists('type', $jsonMessage)) {
+            return $jsonMessage['type'];
+        }
+
+        return 'none';
     }
 }

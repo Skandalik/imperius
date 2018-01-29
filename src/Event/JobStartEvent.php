@@ -13,17 +13,12 @@ class JobStartEvent extends Event
     /** @var Job $job */
     protected $job;
 
-    /** @var int | null $pid */
-    protected $pid;
-
     /**
      * @param Job $job
-     * @param        $pid
      */
-    public function __construct(Job $job, $pid)
+    public function __construct(Job $job)
     {
         $this->job = $job;
-        $this->pid = $pid;
     }
 
     /**
@@ -32,13 +27,5 @@ class JobStartEvent extends Event
     public function getJob(): Job
     {
         return $this->job;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getPid()
-    {
-        return $this->pid;
     }
 }

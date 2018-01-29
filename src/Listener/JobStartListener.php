@@ -6,7 +6,9 @@ use App\Entity\Job;
 use App\Event\JobStartEvent;
 use App\Repository\JobRepository;
 use App\Util\MonitoringService\StatsManager;
+use App\Util\ProcessHandlerService\ProcessHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Process\Process;
 
 class JobStartListener
 {
@@ -19,21 +21,37 @@ class JobStartListener
     /** @var StatsManager */
     private $stats;
 
-    public function __construct(EntityManagerInterface $entityManager, StatsManager $stats)
+    /** @var ProcessHandler */
+    private $processHandler;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        StatsManager $stats,
+        ProcessHandler $processHandler
+    )
     {
         $this->entityManager = $entityManager;
         $this->jobRepository = $this->entityManager->getRepository(Job::class);
         $this->stats = $stats;
+        $this->processHandler = $processHandler;
     }
 
     public function onJobStart(JobStartEvent $event)
     {
         /** @var Job $job */
         $job = $event->getJob();
+        $process = new Process('php ../bin/console ' . $job->getCommand() . ' > /dev/null 2>&1 & echo $!');
+
+        if ($this->processHandler->processStatus($job->getJobPid())) {
+            $this->processHandler->killProcess($job->getJobPid());
+        }
+
+        $process->run();
+
         $job->setRunning(true);
         $job->setError(false);
         $job->setFinished(false);
-        $job->setJobPid($event->getPid());
+        $job->setJobPid(intval($process->getOutput()));
         $this->entityManager->flush();
         $this->entityManager->clear();
 

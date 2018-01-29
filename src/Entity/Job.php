@@ -95,6 +95,14 @@ class Job
     private $jobPid;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="additional_data", type="string", nullable=true)
+     * @Groups({"job"})
+     */
+    private $additionalData;
+
+    /**
      * @return string
      */
     public function getName(): string
@@ -260,6 +268,22 @@ class Job
         $this->jobPid = $jobPid;
 
         return $this;
+    }
+
+    /**
+     * @return string | null
+     */
+    public function getAdditionalData()
+    {
+        return $this->additionalData;
+    }
+
+    /**
+     * @param string | null $additionalData
+     */
+    public function setAdditionalData($additionalData)
+    {
+        $this->additionalData = $additionalData;
     }
 
 }

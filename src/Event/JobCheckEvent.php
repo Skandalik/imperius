@@ -6,9 +6,9 @@ use App\Entity\Job;
 use App\Event\Enum\JobEventEnum;
 use Symfony\Component\EventDispatcher\Event;
 
-class JobStopEvent extends Event
+class JobCheckEvent extends Event
 {
-    const NAME = JobEventEnum::JOB_STOP;
+    const NAME = JobEventEnum::JOB_CHECK;
 
     /** @var Job $job */
     protected $job;

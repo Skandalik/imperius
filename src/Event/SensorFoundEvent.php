@@ -31,6 +31,9 @@ class SensorFoundEvent extends Event
     /** @var bool */
     private $fetchable;
 
+    /** @var string */
+    private $dataType;
+
     /**
      * SensorFoundEvent constructor.
      *
@@ -40,6 +43,7 @@ class SensorFoundEvent extends Event
      * @param bool                               $switchable
      * @param bool                               $adjustable
      * @param int                                $status
+     * @param string                             $dataType
      * @param SensorValueRangeValueObject | null $sensorValueRange
      */
     public function __construct(
@@ -49,6 +53,7 @@ class SensorFoundEvent extends Event
         bool $switchable,
         bool $adjustable,
         int $status,
+        string $dataType,
         $sensorValueRange
     ) {
         $this->uuid = $uuid;
@@ -58,6 +63,7 @@ class SensorFoundEvent extends Event
         $this->adjustable = $adjustable;
         $this->sensorValueRange = $sensorValueRange;
         $this->fetchable = $fetchable;
+        $this->dataType = $dataType;
     }
 
     /**
@@ -112,5 +118,13 @@ class SensorFoundEvent extends Event
     public function isFetchable(): bool
     {
         return $this->fetchable;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDataType(): string
+    {
+        return $this->dataType;
     }
 }

@@ -73,6 +73,14 @@ services:
         tags:
             - { name: kernel.event_listener, event: job.running }
 
+    App\Listener\JobCheckListener:
+        tags:
+            - { name: kernel.event_listener, event: job.check }
+
+    App\Listener\JobUpdateListener:
+        tags:
+            - { name: kernel.event_listener, event: job.update }
+
     App\Util\ManualBehavior\ManualBehaviorManager:
         tags:
             - { name: kernel.event_listener, event: sensor.check, method: checkSensor }

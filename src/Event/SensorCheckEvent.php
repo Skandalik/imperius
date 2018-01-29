@@ -16,8 +16,6 @@ class SensorCheckEvent extends Event
     protected $data;
 
     /**
-     * SensorUpdateEvent constructor.
-     *
      * @param string $uuid
      * @param string $data
      */
@@ -36,27 +34,10 @@ class SensorCheckEvent extends Event
     }
 
     /**
-     * @param string $uuid
-     */
-    public function setUuid(string $uuid)
-    {
-        $this->uuid = $uuid;
-    }
-
-    /**
      * @return string
      */
     public function getData(): string
     {
         return $this->data;
     }
-
-    /**
-     * @param string $data
-     */
-    public function setData(string $data)
-    {
-        $this->data = $data;
-    }
-
 }

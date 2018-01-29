@@ -9,9 +9,9 @@ class MosquittoFactory
     public function create(string $clientId = '')
     {
         if (empty($clientId)) {
-            return new Client();
+            return new Client(null, true);
         }
 
-        return new Client($clientId);
+        return new Client($clientId, true);
     }
 }

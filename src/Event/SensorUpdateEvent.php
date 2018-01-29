@@ -36,27 +36,10 @@ class SensorUpdateEvent extends Event
     }
 
     /**
-     * @param string $uuid
-     */
-    public function setUuid(string $uuid)
-    {
-        $this->uuid = $uuid;
-    }
-
-    /**
      * @return string
      */
     public function getData(): string
     {
         return $this->data;
     }
-
-    /**
-     * @param string $data
-     */
-    public function setData(string $data)
-    {
-        $this->data = $data;
-    }
-
 }

@@ -3,13 +3,15 @@ declare(strict_types=1);
 namespace App\Listener;
 
 use App\Entity\Job;
-use App\Event\JobInterruptEvent;
+use App\Event\Enum\JobEventEnum;
+use App\Event\JobStartEvent;
+use App\Event\JobUpdateEvent;
 use App\Repository\JobRepository;
 use App\Util\MonitoringService\StatsManager;
-use App\Util\ProcessHandlerService\ProcessHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class JobInterruptListener
+class JobUpdateListener
 {
     /** @var JobRepository */
     private $jobRepository;
@@ -20,37 +22,33 @@ class JobInterruptListener
     /** @var StatsManager */
     private $stats;
 
-    /** @var ProcessHandler */
-    private $processHandler;
+    /** @var EventDispatcherInterface */
+    private $eventDispatcher;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         StatsManager $stats,
-        ProcessHandler $processHandler
+        EventDispatcherInterface $eventDispatcher
     ) {
         $this->entityManager = $entityManager;
         $this->jobRepository = $this->entityManager->getRepository(Job::class);
         $this->stats = $stats;
-        $this->processHandler = $processHandler;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function onJobInterrupt(JobInterruptEvent $event)
+    public function onJobUpdate(JobUpdateEvent $event)
     {
         /** @var Job $job */
-        $job = $this->jobRepository->findByCommandName($event->getCommandName());
+        $job = $event->getJob();
 
-        if ($this->processHandler->processStatus($job->getJobPid())) {
-            $this->processHandler->killProcess($job->getJobPid());
-        }
+        $data = $event->getAdditionalData();
+        $job->setAdditionalData($data);
 
-        $job->setRunning(false);
-        $job->setError(true);
-        $job->setJobPid(null);
         $this->entityManager->flush();
         $this->entityManager->clear();
 
-        $this->stats->setStatName('job');
-        $this->stats->event(['action' => 'interrupt', 'name' => $job->getName()]);
+        $startEvent = new JobStartEvent($job);
+        $this->eventDispatcher->dispatch(JobEventEnum::JOB_START, $startEvent);
 
         return;
     }
