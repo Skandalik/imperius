@@ -145,7 +145,6 @@ class Sensor
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="ManualBehavior", mappedBy="sensor", orphanRemoval=true)
-     * @Groups({"sensor"})
      * @ApiSubresource()
      */
     private $manualBehaviors;
@@ -154,7 +153,6 @@ class Sensor
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="ScheduledBehavior", mappedBy="sensor", orphanRemoval=true)
-     * @Groups({"sensor"})
      * @ApiSubresource()
      */
     private $scheduledBehaviors;
