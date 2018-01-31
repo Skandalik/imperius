@@ -8,16 +8,11 @@ use App\Event\SensorCheckEvent;
 use App\Event\SensorUpdateEvent;
 use App\Repository\ManualBehaviorRepository;
 use App\Repository\SensorRepository;
-use App\Type\SensorActionsEnumType;
 use App\Util\ActionManager\ActionManager;
 use App\Util\ConditionChecker\ConditionChecker;
-use App\Util\SensorManager\SensorMosquittoPublisher;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use const PHP_EOL;
-use function count;
-use function explode;
-use function strval;
+use function is_null;
 
 class ManualBehaviorManager
 {
@@ -60,6 +55,10 @@ class ManualBehaviorManager
 
         /** @var Sensor $sensor */
         $sensor = $this->sensorRepository->findByUuid($event->getUuid());
+
+        if (is_null($sensor)) {
+            return;
+        }
 
         $updateEvent = new SensorUpdateEvent($event->getUuid(), $event->getData());
         $this->eventDispatcher->dispatch(SensorUpdateEvent::NAME, $updateEvent);

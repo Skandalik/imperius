@@ -112,7 +112,6 @@ class ScanSensorsCommand extends ContainerAwareCommand
                             $name = SensorFoundEvent::NAME;
                             break;
                         case 'update':
-                            $output->writeln("Sensor Update Event: Set Status: " . $jsonMessage['status']);
                             $event = new SensorCheckEvent(
                                 $jsonMessage['uuid'],
                                 strval($jsonMessage['status'])

@@ -171,6 +171,7 @@ class Sensor
             ->setActive(false)
             ->setSensorIp("")
             ->setCreatedAt(null)
+            ->setDataType("")
         ;
         $this->manualBehaviors = new ArrayCollection();
         $this->scheduledBehaviors = new ArrayCollection();
