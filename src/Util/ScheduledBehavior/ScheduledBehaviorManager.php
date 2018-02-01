@@ -4,13 +4,11 @@ namespace App\Util\ScheduledBehavior;
 
 use App\Event\ScheduledTaskExecuteEvent;
 use App\Util\ActionManager\ActionManager;
+use App\Util\LogHelper\LogContextEnum;
 use App\Util\ScheduledBehavior\Checker\ScheduleChecker;
 use App\Util\ScheduledBehavior\Refresher\ScheduleRefresher;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use const PHP_EOL;
-use function date_format;
 
 class ScheduledBehaviorManager
 {
@@ -23,16 +21,21 @@ class ScheduledBehaviorManager
     /** @var ActionManager */
     private $actionManager;
 
-    /**
-     * @var EntityManagerInterface
-     */
+    /** @var EntityManagerInterface */
     private $entityManager;
 
-    /**
-     * @var LoggerInterface
-     */
+    /** @var LoggerInterface */
     private $logger;
 
+    /**
+     * ScheduledBehaviorManager constructor.
+     *
+     * @param ScheduleChecker        $scheduleChecker
+     * @param ScheduleRefresher      $scheduleRenewer
+     * @param ActionManager          $actionManager
+     * @param EntityManagerInterface $entityManager
+     * @param LoggerInterface        $logger
+     */
     public function __construct(
         ScheduleChecker $scheduleChecker,
         ScheduleRefresher $scheduleRenewer,
@@ -54,18 +57,23 @@ class ScheduledBehaviorManager
      */
     public function execute(ScheduledTaskExecuteEvent $event)
     {
-        $this->logger->error('Catched event!');
         $scheduledBehavior = $event->getBehavior();
         if (!$this->scheduleChecker->check($scheduledBehavior)) {
-            echo PHP_EOL . "Date didn't match! Date now: " . date_format(
-                    new DateTime(),
-                    'Y-m-d H:i:s'
-                ) . " scheduled date: " . date_format($scheduledBehavior->getNextRunAt(), 'Y-m-d H:i:s') . PHP_EOL;
-
             return false;
         }
+        $this->logger->info(
+            sprintf(
+                'Scheduled behavior %s for sensor %s matched!.',
+                $scheduledBehavior->getId(),
+                $scheduledBehavior->getSensor()->getUuid()
+            ),
+            [
+                LogContextEnum::SCHEDULED_BEHAVIOR_ID => $scheduledBehavior->getId(),
+                LogContextEnum::SENSOR_ID             => $scheduledBehavior->getSensor()->getId(),
+                LogContextEnum::SENSOR_UUID           => $scheduledBehavior->getSensor()->getUuid(),
+            ]
+        );
 
-        echo PHP_EOL . "Date matched!" . PHP_EOL;
         $this->actionManager->performAction($scheduledBehavior);
         $this->scheduleRenewer->refresh($scheduledBehavior);
         $this->entityManager->flush();

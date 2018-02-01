@@ -7,14 +7,13 @@ use App\Event\Enum\JobEventEnum;
 use App\Event\JobCheckEvent;
 use App\Event\JobInterruptEvent;
 use App\Repository\ScheduledBehaviorRepository;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use function date_format;
 use function json_decode;
 use function sleep;
 
@@ -31,14 +30,19 @@ class RefreshJobDataCommand extends ContainerAwareCommand
     /** @var ScheduledBehaviorRepository */
     private $repository;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     public function __construct(
         $name = null,
         EntityManagerInterface $entityManager,
-        EventDispatcherInterface $eventDispatcher
+        EventDispatcherInterface $eventDispatcher,
+        LoggerInterface $logger
     ) {
         parent::__construct($name);
         $this->entityManager = $entityManager;
         $this->eventDispatcher = $eventDispatcher;
+        $this->logger = $logger;
     }
 
     protected function configure()
@@ -48,7 +52,7 @@ class RefreshJobDataCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln("Start intervaled scanning jobs");
+        $this->logger->info('Starting refreshing jobs');
         $this->repository = $this->entityManager->getRepository(Job::class);
         try {
             while (true) {
@@ -64,11 +68,10 @@ class RefreshJobDataCommand extends ContainerAwareCommand
 
                     $this->eventDispatcher->dispatch(JobEventEnum::JOB_CHECK, $event);
                 }
-                $output->writeln("Refreshing " . date_format(new DateTime(), "Y-m-d H:i:s"));
                 sleep($data->interval);
             }
         } catch (Exception $exception) {
-            $event = new JobInterruptEvent(self::JOBS_REFRESH);
+            $event = new JobInterruptEvent(self::JOBS_REFRESH, $exception);
             $this->eventDispatcher->dispatch(JobInterruptEvent::NAME, $event);
         }
     }

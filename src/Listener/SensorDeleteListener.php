@@ -4,19 +4,34 @@ namespace App\Listener;
 
 use App\Entity\ManualBehavior;
 use App\Entity\Sensor;
+use App\Util\LogHelper\LogContextEnum;
 use App\Util\MonitoringService\StatsManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
+use Psr\Log\LoggerInterface;
 
 class SensorDeleteListener
 {
     /** @var StatsManager */
     private $stats;
 
-    public function __construct(StatsManager $stats)
+    /** @var LoggerInterface */
+    private $logger;
+
+    /**
+     * SensorDeleteListener constructor.
+     *
+     * @param StatsManager    $stats
+     * @param LoggerInterface $logger
+     */
+    public function __construct(StatsManager $stats, LoggerInterface $logger)
     {
         $this->stats = $stats;
+        $this->logger = $logger;
     }
 
+    /**
+     * @param LifecycleEventArgs $eventArgs
+     */
     public function preRemove(LifecycleEventArgs $eventArgs)
     {
         $entity = $eventArgs->getEntity();
@@ -33,6 +48,13 @@ class SensorDeleteListener
 
         $this->stats->setStatName('sensor');
         $this->stats->event(['action' => 'delete', 'uuid' => $entity->getUuid(),]);
+
+        $this->logger->info(
+            sprintf('Deleted Sensor: %s with UUID: %s', $entity->getId(), $entity->getUuid()),
+            [
+                LogContextEnum::SENSOR_UUID => $entity->getUuid(),
+            ]
+        );
 
         return;
     }

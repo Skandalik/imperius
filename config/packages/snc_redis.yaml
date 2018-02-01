@@ -1,27 +1,27 @@
 snc_redis:
     clients:
-        default:
-            type: predis
-            alias: default
-            dsn: "redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%/%env(REDIS_DB_DOCTRINE_API)%"
-        doctrine:
-            type: predis
-            alias: doctrine
-            dsn: "redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%/%env(REDIS_DB_DOCTRINE_API)%"
+#        default:
+#            type: predis
+#            alias: default
+#            dsn: "redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%/%env(REDIS_DB_DOCTRINE_API)%"
+#        doctrine:
+#            type: predis
+#            alias: doctrine
+#            dsn: "redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%/%env(REDIS_DB_DOCTRINE_API)%"
         sensor_api:
             type: phpredis
             alias: sensor_api
             dsn: "redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%/%env(REDIS_DB_SENSOR_API)%"
-    doctrine:
-        metadata_cache:
-            client: doctrine
-            entity_manager: default
-            namespace: 'dmc:'
-        result_cache:
-            client: doctrine
-            entity_manager: default
-            namespace: 'drc:'
-        query_cache:
-            client: doctrine
-            entity_manager: default
-            namespace: 'dqc:'
+#    doctrine:
+#        metadata_cache:
+#            client: doctrine
+#            entity_manager: default
+#            namespace: 'dmc:'
+#        result_cache:
+#            client: doctrine
+#            entity_manager: default
+#            namespace: 'drc:'
+#        query_cache:
+#            client: doctrine
+#            entity_manager: default
+#            namespace: 'dqc:'

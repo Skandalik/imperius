@@ -19,6 +19,12 @@ services:
             - 8888:8888
         volumes_from:
             - code
+        depends_on:
+            - php-fpm-xdebug
+            - php-fpm
+            - influxdb
+            - grafana
+            - graylog
 
     php-fpm:
         container_name: php-fpm.imperius.home
@@ -53,7 +59,7 @@ services:
         networks:
             - imperius
         volumes:
-            - imperius-mysql:/var/lib/mysql:nocopy
+            - imperius-mysql:/var/lib/mysql
         ports:
             - 13333:3306
         environment:
@@ -112,11 +118,60 @@ services:
         networks:
             - imperius
 
+    mongo:
+        container_name: mongo.imperius.home
+        build: ./docker/mongo
+        networks:
+            - imperius
+        volumes_from:
+            - code
+        volumes:
+            - mongo:/data/db
+
+    elasticsearch:
+        container_name: elasticsearch.imperius.home
+        build: ./docker/elasticsearch
+        command: "elasticsearch -Des.cluster.name='graylog'"
+        networks:
+            - imperius
+        volumes_from:
+            - code
+        volumes:
+            - elasticsearch:/usr/share/elasticsearch/data
+
+    graylog:
+        container_name: graylog.imperius.home
+        build: ./docker/graylog
+        environment:
+            GRAYLOG_PASSWORD_SECRET: somepasswordpepper
+            GRAYLOG_ROOT_PASSWORD_SHA2: 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+            GRAYLOG_WEB_ENDPOINT_URI: http://graylog.imperius.home:8888/api
+        depends_on:
+            - mongo
+            - elasticsearch
+        networks:
+            - imperius
+        ports:
+            - 9000:9000
+        volumes_from:
+            - code
+        volumes:
+            - graylog-journal:/usr/share/graylog/data/journal
+            - graylog-config:/usr/share/graylog/data/config
+
 volumes:
     imperius:
         external: true
     imperius-mysql:
-        external: true
+        external: false
+    mongo:
+        external: false
+    elasticsearch:
+        external: false
+    graylog-journal:
+        external: false
+    graylog-config:
+        external: false
 
 networks:
     imperius:

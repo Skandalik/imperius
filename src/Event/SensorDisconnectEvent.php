@@ -3,7 +3,6 @@ declare(strict_types=1);
 namespace App\Event;
 
 use App\Event\Enum\SensorEventEnum;
-use App\Type\SensorStateEnumType;
 use Symfony\Component\EventDispatcher\Event;
 
 class SensorDisconnectEvent extends Event
@@ -34,9 +33,9 @@ class SensorDisconnectEvent extends Event
     }
 
     /**
-     * @return string
+     * @return bool
      */
-    public function getState(): string
+    public function getState(): bool
     {
         return $this->state;
     }

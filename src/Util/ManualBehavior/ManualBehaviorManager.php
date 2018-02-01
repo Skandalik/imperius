@@ -10,7 +10,9 @@ use App\Repository\ManualBehaviorRepository;
 use App\Repository\SensorRepository;
 use App\Util\ActionManager\ActionManager;
 use App\Util\ConditionChecker\ConditionChecker;
+use App\Util\LogHelper\LogContextEnum;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use function is_null;
 
@@ -34,16 +36,30 @@ class ManualBehaviorManager
     /** @var ActionManager */
     private $actionManager;
 
+    /** @var LoggerInterface */
+    private $logger;
+
+    /**
+     * ManualBehaviorManager constructor.
+     *
+     * @param EntityManagerInterface   $entityManager
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param ConditionChecker         $conditionChecker
+     * @param ActionManager            $actionExecutor
+     * @param LoggerInterface          $logger
+     */
     public function __construct(
         EntityManagerInterface $entityManager,
         EventDispatcherInterface $eventDispatcher,
         ConditionChecker $conditionChecker,
-        ActionManager $actionExecutor
+        ActionManager $actionExecutor,
+        LoggerInterface $logger
     ) {
         $this->entityManager = $entityManager;
         $this->eventDispatcher = $eventDispatcher;
         $this->conditionChecker = $conditionChecker;
         $this->actionManager = $actionExecutor;
+        $this->logger = $logger;
     }
 
     /**
@@ -87,9 +103,39 @@ class ManualBehaviorManager
     private function checkCondition(ManualBehavior $behavior)
     {
         if (!$this->conditionChecker->checkCondition($behavior)) {
+            $this->logger->info(
+                sprintf(
+                    'Manual behavior %s for sensor %s didn\'t matched requirements!',
+                    $behavior->getId(),
+                    $behavior->getSensor()->getUuid()
+                ),
+                [
+                    LogContextEnum::MANUAL_BEHAVIOR_ID => $behavior->getId(),
+                    LogContextEnum::SENSOR_ID          => $behavior->getSensor()->getId(),
+                    LogContextEnum::SENSOR_UUID        => $behavior->getSensor()->getUuid(),
+                    LogContextEnum::ACTION_SENSOR_ID   => $behavior->getActionSensor()->getId(),
+                    LogContextEnum::ACTION_SENSOR_UUID => $behavior->getActionSensor()->getUuid(),
+                ]
+            );
 
             return;
         }
+
+        $this->logger->info(
+            sprintf(
+                'Manual behavior %s for sensor %s matched requirements!',
+                $behavior->getId(),
+                $behavior->getSensor()->getUuid()
+            ),
+            [
+                LogContextEnum::MANUAL_BEHAVIOR_ID => $behavior->getId(),
+                LogContextEnum::SENSOR_ID          => $behavior->getSensor()->getId(),
+                LogContextEnum::SENSOR_UUID        => $behavior->getSensor()->getUuid(),
+                LogContextEnum::ACTION_SENSOR_ID   => $behavior->getActionSensor()->getId(),
+                LogContextEnum::ACTION_SENSOR_UUID => $behavior->getActionSensor()->getUuid(),
+            ]
+        );
+
         $this->actionManager->performAction($behavior);
 
         $this->flushAndClear();

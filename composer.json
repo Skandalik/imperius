@@ -9,6 +9,7 @@
         "jms/serializer-bundle": "^2.3",
         "lexik/jwt-authentication-bundle": "^2.4",
       "liuggio/statsd-client-bundle": "^1.6",
+      "mlehner/gelf-php": "^1.1",
         "nakard/mosquitto-php-stub": "dev-master",
         "nelmio/cors-bundle": "^1.5",
         "pagerfanta/pagerfanta": "^1.0",

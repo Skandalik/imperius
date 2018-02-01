@@ -8,10 +8,12 @@ use App\Command\ScanSensorsCommand;
 use App\Entity\Job;
 use App\Event\JobStopEvent;
 use App\Repository\JobRepository;
+use App\Util\LogHelper\LogContextEnum;
 use App\Util\MonitoringService\StatsManager;
 use App\Util\ProcessHandlerService\ProcessHandler;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class JobStopListener
@@ -31,19 +33,36 @@ class JobStopListener
     /** @var EventDispatcherInterface */
     private $eventDispatcher;
 
+    /** @var LoggerInterface */
+    private $logger;
+
+    /**
+     * JobStopListener constructor.
+     *
+     * @param EntityManagerInterface   $entityManager
+     * @param StatsManager             $stats
+     * @param ProcessHandler           $processHandler
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param LoggerInterface          $logger
+     */
     public function __construct(
         EntityManagerInterface $entityManager,
         StatsManager $stats,
         ProcessHandler $processHandler,
-        EventDispatcherInterface $eventDispatcher
+        EventDispatcherInterface $eventDispatcher,
+        LoggerInterface $logger
     ) {
         $this->entityManager = $entityManager;
         $this->jobRepository = $this->entityManager->getRepository(Job::class);
         $this->stats = $stats;
         $this->processHandler = $processHandler;
         $this->eventDispatcher = $eventDispatcher;
+        $this->logger = $logger;
     }
 
+    /**
+     * @param JobStopEvent $event
+     */
     public function onJobStop(JobStopEvent $event)
     {
         /** @var Job $job */
@@ -76,6 +95,21 @@ class JobStopListener
 
         $this->stats->setStatName('job');
         $this->stats->event(['action' => 'stop', 'name' => $job->getName()]);
+
+        $this->logger->info(
+            sprintf(
+                'Stopped job: %s, command: %s, assigned PID: %s',
+                $job->getName(),
+                $job->getCommand(),
+                $job->getJobPid()
+            ),
+            [
+                LogContextEnum::JOB_ID      => $job->getId(),
+                LogContextEnum::JOB_NAME    => $job->getName(),
+                LogContextEnum::JOB_COMMAND => $job->getCommand(),
+                LogContextEnum::JOB_PID     => $job->getJobPid(),
+            ]
+        );
 
         return;
     }

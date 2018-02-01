@@ -5,11 +5,14 @@ namespace App\Listener;
 use App\Entity\Sensor;
 use App\Event\SensorUpdateEvent;
 use App\Repository\SensorRepository;
+use App\Util\LogHelper\LogContextEnum;
 use App\Util\MonitoringService\StatsManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Redis;
 use function date_format;
+use function sprintf;
 
 class SensorUpdateListener
 {
@@ -28,15 +31,28 @@ class SensorUpdateListener
     /** @var StatsManager */
     private $stats;
 
+    /** @var LoggerInterface */
+    private $logger;
+
+    /**
+     * SensorUpdateListener constructor.
+     *
+     * @param Redis                  $redis
+     * @param EntityManagerInterface $entityManager
+     * @param StatsManager           $stats
+     * @param LoggerInterface        $logger
+     */
     public function __construct(
         Redis $redis,
         EntityManagerInterface $entityManager,
-        StatsManager $stats
+        StatsManager $stats,
+        LoggerInterface $logger
     ) {
         $this->entityManager = $entityManager;
         $this->sensorRepository = $this->entityManager->getRepository(Sensor::class);
         $this->redis = $redis;
         $this->stats = $stats;
+        $this->logger = $logger;
     }
 
     /**
@@ -48,6 +64,7 @@ class SensorUpdateListener
         $sensor = $this->sensorRepository->findByUuid($event->getUuid());
         $data = (int) $event->getData();
         $this->setStatusOrState($sensor, $data);
+        $sensor->setLastDataSentAt(new DateTime());
         $this->saveToRedis($sensor, $event);
 
         $this->entityManager->persist($sensor);
@@ -63,6 +80,13 @@ class SensorUpdateListener
                 'uuid'      => $sensor->getUuid(),
             ],
             $data
+        );
+
+        $this->logger->info(
+            sprintf('Updated Sensor: %s with UUID: %s', $sensor->getId(), $sensor->getUuid()),
+            [
+                LogContextEnum::SENSOR_UUID => $sensor->getUuid(),
+            ]
         );
 
         return;

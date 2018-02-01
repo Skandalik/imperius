@@ -5,9 +5,10 @@ namespace App\Listener;
 use App\Entity\Sensor;
 use App\Event\SensorDisconnectEvent;
 use App\Repository\SensorRepository;
+use App\Util\LogHelper\LogContextEnum;
 use App\Util\MonitoringService\StatsManager;
 use Doctrine\ORM\EntityManagerInterface;
-use function boolval;
+use Psr\Log\LoggerInterface;
 
 class SensorDisconnectListener
 {
@@ -20,26 +21,45 @@ class SensorDisconnectListener
     /** @var StatsManager */
     private $stats;
 
-    public function __construct(EntityManagerInterface $entityManager, StatsManager $stats)
+    /** @var LoggerInterface */
+    private $logger;
+
+    /**
+     * SensorDisconnectListener constructor.
+     *
+     * @param EntityManagerInterface $entityManager
+     * @param StatsManager           $stats
+     * @param LoggerInterface        $logger
+     */
+    public function __construct(EntityManagerInterface $entityManager, StatsManager $stats, LoggerInterface $logger)
     {
         $this->entityManager = $entityManager;
         $this->sensorRepository = $this->entityManager->getRepository(Sensor::class);
         $this->stats = $stats;
+        $this->logger = $logger;
     }
 
-    public function onSensorUpdate(SensorDisconnectEvent $event)
+    public function onSensorDisconnect(SensorDisconnectEvent $event)
     {
         /** @var Sensor $sensor */
         $sensor = $this->sensorRepository->findByUuid($event->getUuid());
 
-        $sensor->setActive(boolval($event->getState()));
+        $sensor->setActive($event->getState());
 
         $this->entityManager->persist($sensor);
         $this->entityManager->flush();
         $this->entityManager->clear();
 
         $this->stats->setStatName('sensor');
-        $this->stats->event(['action' => 'disconnect', 'uuid' => $sensor->getUuid(),]);
+        $this->stats->event(['action' => 'disconnect', 'uuid' => $sensor->getUuid()]);
+
+        $this->logger->error(
+            sprintf('Sensor ID: %s with UUID: %s has been disconnected!', $sensor->getId(), $sensor->getUuid()),
+            [
+                LogContextEnum::SENSOR_ID   => $sensor->getId(),
+                LogContextEnum::SENSOR_UUID => $sensor->getUuid(),
+            ]
+        );
 
         return;
     }

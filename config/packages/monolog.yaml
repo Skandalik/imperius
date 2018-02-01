@@ -1,0 +1,7 @@
+monolog:
+    handlers:
+        graylog:
+            type: service
+            id: monolog.gelf_handler
+            level: debug
+            channels: !event

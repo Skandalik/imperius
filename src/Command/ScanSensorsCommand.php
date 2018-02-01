@@ -12,6 +12,7 @@ use App\Util\TopicGenerator\Enum\TopicEnum;
 use Exception;
 use Mosquitto\Client;
 use Mosquitto\Message;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,6 +20,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use function array_key_exists;
 use function getenv;
+use function key_exists;
 
 class ScanSensorsCommand extends ContainerAwareCommand
 {
@@ -33,6 +35,9 @@ class ScanSensorsCommand extends ContainerAwareCommand
 
     /** @var SensorValueRangeFactory */
     private $sensorValueRangeFactory;
+
+    /** @var LoggerInterface */
+    private $logger;
 
     /** @var array */
     private $topics = [
@@ -50,11 +55,13 @@ class ScanSensorsCommand extends ContainerAwareCommand
     public function __construct(
         $name = null,
         EventDispatcherInterface $eventDispatcher,
-        SensorValueRangeFactory $sensorValueRangeFactory
+        SensorValueRangeFactory $sensorValueRangeFactory,
+        LoggerInterface $logger
     ) {
         parent::__construct($name);
         $this->eventDispatcher = $eventDispatcher;
         $this->sensorValueRangeFactory = $sensorValueRangeFactory;
+        $this->logger = $logger;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -63,26 +70,15 @@ class ScanSensorsCommand extends ContainerAwareCommand
             //TODO popraw tworzenie klienta
             $client = new Client(self::CLIENT_ID);
 
-            $output->writeln("");
-            $output->writeln("");
-            $output->writeln("=================================");
-            $output->writeln("Imperius Home Automation Project");
-            $output->writeln("=================================");
-            $output->writeln("");
-            $output->writeln("Starting command to scan for nearby sensors in your house!");
-            $output->writeln("It will listen for every change that your sensor will do.");
-            $output->writeln("");
-            $output->writeln("");
-
             $client->onDisconnect(
                 function ($rc) use ($output, $client) {
-                    $output->writeln('Disconnected. Failure with code: ' . $rc);
+                    $this->logger->error(sprintf('MQTT client disconnected. Failure with code %s.', $rc));
                 }
             );
 
             $client->onConnect(
                 function () use ($output) {
-                    $output->writeln('Connected to MQTT Broker.');
+                    $this->logger->info('Connected to MQTT broker.');
                 }
             );
 
@@ -90,14 +86,14 @@ class ScanSensorsCommand extends ContainerAwareCommand
             $client->onMessage(
                 function ($message) use ($output, $client) {
                     $jsonMessage = json_decode($message->payload, true);
-                    if (is_string($jsonMessage['status'])) {
-                        $tempStatus = (float) $jsonMessage['status'];
-                        $jsonMessage['status'] = (int) round($tempStatus);
+                    if (key_exists('status', $jsonMessage)) {
+                        if (is_string($jsonMessage['status'])) {
+                            $tempStatus = (float) $jsonMessage['status'];
+                            $jsonMessage['status'] = (int) round($tempStatus);
+                        }
                     }
                     switch ($jsonMessage['action']) {
                         case 'register':
-                            $output->writeln("");
-                            $output->writeln("Found new sensor!");
                             $event = new SensorFoundEvent(
                                 $jsonMessage['uuid'],
                                 $jsonMessage['ip'],
@@ -120,7 +116,6 @@ class ScanSensorsCommand extends ContainerAwareCommand
                             $name = SensorCheckEvent::NAME;
                             break;
                         case 'disconnect':
-                            $output->writeln("Sensor has disconnected unexpedectly. Received last will message.");
                             $event = new SensorDisconnectEvent($jsonMessage['uuid']);
 
                             $name = SensorDisconnectEvent::NAME;
@@ -130,30 +125,32 @@ class ScanSensorsCommand extends ContainerAwareCommand
                             break;
                     }
                     $this->eventDispatcher->dispatch($name, $event);
-                    $output->writeln("");
-                    $output->writeln("");
                 }
             );
 
-            $output->writeln("Connecting to an MQTT Broker on port " . self::MQTT_BROKER_PORT . '.');
-            $output->writeln("IP of MQTT Broker " . getenv('MOSQUITTO_BROKER_HOST') . '.');
-            $output->writeln("Keep Alive responding for this command client: " . self::MQTT_BROKER_KEEP_ALIVE . '.');
-            $output->writeln("");
+            $this->logger->info(
+                sprintf(
+                    'Connecting to an MQTT broker on port: %s, IP: %s, keep alive: ',
+                    self::MQTT_BROKER_PORT,
+                    getenv('MOSQUITTO_BROKER_HOST'),
+                    self::MQTT_BROKER_KEEP_ALIVE
+                )
+            );
 
             $this->connectMqttClient($client);
 
-            $output->writeln("Subscribing to topics:");
-
+            $topics = "";
             foreach ($this->topics as $topic => $qos) {
-                $output->writeln("- " . $topic);
+                $topics .= ("- " . $topic);
                 $client->subscribe($topic, $qos);
             }
 
+            $this->logger->info(sprintf('Subscribed to topics: %s', $topics));
+
             $client->loopForever();
-            $output->writeln('Exiting gracefully...');
         } catch (Exception $exception) {
             $events = [];
-            $events[] = new JobInterruptEvent(self::SENSORS_SCAN);
+            $events[] = new JobInterruptEvent(self::SENSORS_SCAN, $exception);
             $events[] = new JobInterruptEvent(ScanScheduledTasksCommand::SENSORS_SCHEDULED);
             $events[] = new JobInterruptEvent(RefreshSensorsDataCommand::SENSORS_REFRESH);
             foreach ($events as $event) {

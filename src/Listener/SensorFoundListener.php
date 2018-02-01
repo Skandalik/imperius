@@ -6,7 +6,8 @@ use App\Entity\Sensor;
 use App\Event\SensorAddEvent;
 use App\Event\SensorFoundEvent;
 use App\Factory\SensorFactory;
-use App\Type\SensorStateEnumType;
+use App\Util\LogHelper\LogContextEnum;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class SensorFoundListener
@@ -17,10 +18,17 @@ class SensorFoundListener
     /** @var SensorFactory */
     private $sensorFactory;
 
-    public function __construct(EventDispatcherInterface $eventDispatcher, SensorFactory $sensorFactory)
-    {
+    /** @var LoggerInterface */
+    private $logger;
+
+    public function __construct(
+        EventDispatcherInterface $eventDispatcher,
+        SensorFactory $sensorFactory,
+        LoggerInterface $logger
+    ) {
         $this->eventDispatcher = $eventDispatcher;
         $this->sensorFactory = $sensorFactory;
+        $this->logger = $logger;
     }
 
     public function onSensorFound(SensorFoundEvent $event)
@@ -49,11 +57,19 @@ class SensorFoundListener
         $sensor->setAdjustable($event->isAdjustable());
         $sensor->setActive(true);
         $sensor->setStatus($event->getStatus());
+        $sensor->setDataType($event->getDataType());
 
         if ($event->isAdjustable()) {
             $sensor->setMinimumValue($event->getSensorValueRange()->getMinimumValue());
             $sensor->setMaximumValue($event->getSensorValueRange()->getMaximumValue());
         }
+
+        $this->logger->info(
+            sprintf('Found new Sensor with UUID: %s!', $sensor->getUuid()),
+            [
+                LogContextEnum::SENSOR_UUID => $sensor->getUuid(),
+            ]
+        );
 
         return $sensor;
     }

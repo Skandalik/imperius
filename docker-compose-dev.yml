@@ -8,6 +8,5 @@ services:
 volumes:
     imperius:
         external: true
-
     imperius-mysql:
-        external: true
+        external: false
