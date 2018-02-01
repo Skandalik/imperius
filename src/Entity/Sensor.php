@@ -114,6 +114,14 @@ class Sensor
     private $active;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="disconnected", type="boolean", nullable=false)
+     * @Groups({"sensor"})
+     */
+    private $disconnected;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="sensor_ip", type="string", length=50, nullable=false, unique=true)
@@ -170,6 +178,7 @@ class Sensor
             ->setAdjustable(false)
             ->setActive(false)
             ->setSensorIp("")
+            ->setDisconnected(false)
             ->setCreatedAt(null)
             ->setDataType("")
         ;
@@ -585,5 +594,23 @@ class Sensor
     public function setDataType(string $dataType)
     {
         $this->dataType = $dataType;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDisconnected(): bool
+    {
+        return $this->disconnected;
+    }
+
+    /**
+     * @param bool $disconnected
+     */
+    public function setDisconnected(bool $disconnected)
+    {
+        $this->disconnected = $disconnected;
+
+        return $this;
     }
 }

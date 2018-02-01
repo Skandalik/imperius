@@ -56,6 +56,7 @@ class SensorFoundListener
         $sensor->setSwitchable($event->isSwitchable());
         $sensor->setAdjustable($event->isAdjustable());
         $sensor->setActive(true);
+        $sensor->setDisconnected(false);
         $sensor->setStatus($event->getStatus());
         $sensor->setDataType($event->getDataType());
 
