@@ -198,6 +198,10 @@ class Sensor
             $this->setCreatedAt(new DateTime());
         }
 
+        if (is_null($this->getLastDataSentAt())) {
+            $this->setLastDataSentAt(new DateTime());
+        }
+
         if (empty($this->getDataType())) {
             $this->setDataType('none');
         }
