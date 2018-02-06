@@ -9,6 +9,7 @@ class SensorEventEnum
     public const SENSOR_UPDATE = 'sensor.update';
     public const SENSOR_DELETE = 'sensor.delete';
     public const SENSOR_DISCONNECT = 'sensor.disconnect';
+    public const SENSOR_CONNECT = 'sensor.connect';
     public const SENSOR_CHECK = 'sensor.check';
 
     public const SENSOR_FOUND_EVENT = 'onSensorFound';
@@ -25,6 +26,7 @@ class SensorEventEnum
         self::SENSOR_UPDATE     => 'update',
         self::SENSOR_DELETE     => 'delete',
         self::SENSOR_DISCONNECT => 'disconnect',
+        self::SENSOR_CONNECT    => 'connect',
         self::SENSOR_CHECK      => 'check',
     ];
 

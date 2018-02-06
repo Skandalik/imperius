@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Job;
 use App\Entity\Sensor;
 use App\Event\JobInterruptEvent;
+use App\Event\SensorConnectEvent;
 use App\Event\SensorDisconnectEvent;
 use App\Repository\ScheduledBehaviorRepository;
 use App\Repository\SensorRepository;
@@ -89,14 +90,18 @@ class RefreshSensorsDataCommand extends ContainerAwareCommand
                 $sensors = $this->sensorRepository->findAll();
                 if (!empty($sensors)) {
                     foreach ($sensors as $sensor) {
-                        if ($sensor->isActive()) {
-                            $now = new DateTime();
-                            $diff = $now->diff($sensor->getLastDataSentAt());
-                            if ($diff->s > $data->interval) {
-                                $event = new SensorDisconnectEvent($sensor->getUuid());
-                                $this->eventDispatcher->dispatch(SensorDisconnectEvent::NAME, $event);
+                        $now = new DateTime();
+                        $diff = $now->diff($sensor->getLastDataSentAt());
+                        if ($diff->i === 0 && $diff->h === 0) {
+                            if ($diff->s <= ($data->interval + 5)) {
+                                $event = new SensorConnectEvent($sensor->getUuid());
+                                $this->eventDispatcher->dispatch(SensorConnectEvent::NAME, $event);
+                                continue;
                             }
                         }
+                        $output->writeln($sensor->getUuid());
+                        $event = new SensorDisconnectEvent($sensor->getUuid());
+                        $this->eventDispatcher->dispatch(SensorDisconnectEvent::NAME, $event);
                     }
                 }
                 sleep($data->interval);

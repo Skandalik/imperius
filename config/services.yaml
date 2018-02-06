@@ -68,6 +68,10 @@ services:
         tags:
             - { name: kernel.event_listener, event: sensor.disconnect }
 
+    App\Listener\SensorConnectListener:
+        tags:
+            - { name: kernel.event_listener, event: sensor.connect }
+
     App\Listener\JobStartListener:
         tags:
             - { name: kernel.event_listener, event: job.start }

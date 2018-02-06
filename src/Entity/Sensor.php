@@ -124,7 +124,7 @@ class Sensor
     /**
      * @var string
      *
-     * @ORM\Column(name="sensor_ip", type="string", length=50, nullable=false, unique=true)
+     * @ORM\Column(name="sensor_ip", type="string", length=50, nullable=false, unique=false)
      */
     private $sensorIp;
 
