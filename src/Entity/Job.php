@@ -79,14 +79,6 @@ class Job
     private $finished;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="immediate_rerun", type="boolean", nullable=false)
-     * @Groups({"job"})
-     */
-    private $immediateRerun;
-
-    /**
      * @var int
      *
      * @ORM\Column(name="job_pid", type="integer", nullable=true)
@@ -192,22 +184,6 @@ class Job
         $this->finished = $finished;
 
         return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isImmediateRerun(): bool
-    {
-        return $this->immediateRerun;
-    }
-
-    /**
-     * @param bool $immediateRerun
-     */
-    public function setImmediateRerun(bool $immediateRerun)
-    {
-        $this->immediateRerun = $immediateRerun;
     }
 
     /**
