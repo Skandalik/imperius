@@ -92,14 +92,11 @@ class RefreshSensorsDataCommand extends ContainerAwareCommand
                     foreach ($sensors as $sensor) {
                         $now = new DateTime();
                         $diff = $now->diff($sensor->getLastDataSentAt());
-                        if ($diff->i === 0 && $diff->h === 0) {
-                            if ($diff->s <= ($data->interval + 5)) {
-                                $event = new SensorConnectEvent($sensor->getUuid());
-                                $this->eventDispatcher->dispatch(SensorConnectEvent::NAME, $event);
-                                continue;
-                            }
+                        if ($this->convertDateIntervalToSeconds($diff) <= ($data->interval + 5)) {
+                            $event = new SensorConnectEvent($sensor->getUuid());
+                            $this->eventDispatcher->dispatch(SensorConnectEvent::NAME, $event);
+                            continue;
                         }
-                        $output->writeln($sensor->getUuid());
                         $event = new SensorDisconnectEvent($sensor->getUuid());
                         $this->eventDispatcher->dispatch(SensorDisconnectEvent::NAME, $event);
                     }
@@ -110,5 +107,15 @@ class RefreshSensorsDataCommand extends ContainerAwareCommand
             $event = new JobInterruptEvent(self::SENSORS_REFRESH, $exception);
             $this->eventDispatcher->dispatch(JobInterruptEvent::NAME, $event);
         }
+    }
+
+    /**
+     * @param \DateInterval $dateInterval
+     *
+     * @return float|int
+     */
+    protected function convertDateIntervalToSeconds(\DateInterval $dateInterval)
+    {
+        return -1 * (new DateTime())->setTimeStamp(0)->add($dateInterval)->getTimeStamp();
     }
 }

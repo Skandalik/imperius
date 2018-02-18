@@ -156,7 +156,7 @@ services:
         volumes_from:
             - code
         ports:
-            - 9000:9000
+            - 9004:9000
         volumes:
             - graylog-journal:/usr/share/graylog/data/journal
             - graylog-config:/usr/share/graylog/data/config
