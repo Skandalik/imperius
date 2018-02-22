@@ -16,16 +16,20 @@ RUN apt-get update -qq && \
         g++ \
         make \
         musl-dev \
+        libmosquitto-dev \
         libmagickwand-dev --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
 RUN pecl install imagick && docker-php-ext-enable imagick
 
 RUN pecl install apcu \
     && pecl install apcu_bc-1.0.3 \
-    && docker-php-ext-enable apcu --ini-name 10-docker-php-ext-apcu.ini \
-    && docker-php-ext-enable apc --ini-name 20-docker-php-ext-apc.ini
+    && docker-php-ext-enable --ini-name 20-apcu.ini apcu
 
 RUN docker-php-ext-configure opcache --enable-opcache
+RUN docker-php-ext-enable --ini-name 05-opcache.ini opcache
 
+RUN pecl install Mosquitto-alpha \
+    && docker-php-ext-enable mosquitto
 
 RUN docker-php-ext-install \
     sockets \
@@ -38,24 +42,21 @@ RUN pecl install -o -f redis \
 &&  docker-php-ext-enable redis
 
 
-# Xdebug
-# here is the installation
-#RUN pecl install xdebug \
-#    && docker-php-ext-enable xdebug
-# here I'm copying the config file we will discuss in the next section
-#COPY ./etc/xdebug.ini /usr/local/etc/php/conf.d/
+RUN pecl install xdebug
+COPY ./etc/xdebug.ini /xdebug.ini
+
+COPY ./etc/apcu.ini /usr/local/etc/php/conf.d/apcu.ini
+COPY ./etc/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # ensure 'web' user exists
-#RUN set -x \
-#	&& adduser web --uid 1000 --disabled-password --gecos ""
+RUN set -x \
+	&& adduser web --uid 1000 --disabled-password --gecos ""
 
-COPY ./scripts/entrypoint.sh /usr/local/bin/
+COPY ./entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 RUN php-config --extension-dir | xargs ls -la
 
 RUN ls -la /etc/
-
-ENTRYPOINT ["entrypoint.sh"]
 
 CMD ["php-fpm"]

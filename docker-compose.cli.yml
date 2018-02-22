@@ -5,6 +5,8 @@ services:
         build: ./docker/php-cli
         networks:
             - imperius
+        ports:
+          - 8180:80
         volumes_from:
             - code
 
@@ -23,23 +25,10 @@ services:
     composer:
         container_name: composer.imperius.home
         build: docker/php-cli
-        command: composer config -g github-oauth.github.com $GITHUB_TOKEN
         entrypoint: composer
-        environment:
-            - GITHUB_TOKEN
         networks:
             - imperius
         volumes_from:
             - code
         depends_on:
             - code
-
-volumes:
-    imperius:
-        external: true
-    imperius-mysql:
-        external: true
-
-networks:
-    imperius:
-        external: true

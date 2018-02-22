@@ -1,8 +1,45 @@
-#index:
-#    path: /
-#    defaults: { _controller: 'App\Controller\DefaultController::index' }
+api_login_check:
+    path: /api/login_check
 
-# first, run composer req annotations
-controllers:
-    resource: ../src/Controller/
-    type: annotation
+api_logout:
+    path: /api/logout
+
+#overview:
+#    path: /overview
+#    defaults: { _controller: 'App\Controller\OverviewController::indexAction' }
+
+#sensor:
+#    path: /sensor
+#    defaults: { _controller: 'App\Controller\SensorController::indexAction' }
+#
+#sensor_add:
+#    path: /sensor/add
+#    defaults: { _controller: 'App\Controller\SensorController::addAction' }
+#
+#sensor_edit:
+#    path: /sensor/edit/{id}
+#    defaults: { _controller: 'App\Controller\SensorController::editAction' }
+#
+#sensor_delete:
+#    path: /sensor/delete/{id}
+#    defaults: { _controller: 'App\Controller\SensorController::deleteAction' }
+#
+#room:
+#    path: /room
+#    defaults: { _controller: 'App\Controller\RoomController::indexAction' }
+#
+#room_add:
+#    path: /room/add
+#    defaults: { _controller: 'App\Controller\RoomController::addAction' }
+#
+#room_edit:
+#    path: /room/edit/{id}
+#    defaults: { _controller: 'App\Controller\RoomController::editAction' }
+#
+#room_delete:
+#    path: /room/delete/{id}
+#    defaults: { _controller: 'App\Controller\RoomController::deleteAction' }
+#
+#set_status:
+#    path: /sensor/{uuid}/status/set/{status}
+#    defaults: { _controller: 'App\Controller\PublishController::setStatusAction' }

@@ -1,15 +1,21 @@
 framework:
     secret: '%env(APP_SECRET)%'
-    #default_locale: en
-    #csrf_protection: ~
+    default_locale: en
+    csrf_protection: true
     #http_method_override: true
-    #trusted_hosts: ~
-    # https://symfony.com/doc/current/reference/configuration/framework.html#handler-id
-    #session:
-    #    # The native PHP session handler will be used
-    #    handler_id: ~
+
+    # uncomment this entire section to enable sessions
+    session:
+        # With this config, PHP's native session handling is used
+        handler_id: ~
+
     #esi: ~
     #fragments: ~
     php_errors:
         log: true
     translator: ~
+    session:
+        save_path: /tmp
+    templating:
+        engines: ['twig']
+    cache:

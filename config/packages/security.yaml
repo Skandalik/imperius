@@ -1,14 +1,54 @@
 security:
+#    encoders:
+#        Symfony\Component\Security\Core\User\User:
+#            algorithm: bcrypt
+#            cost: 12
     # https://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
+#    providers:
+#        in_memory: { memory: ~ }
+#TODO fix security
+    encoders:
+        App\Entity\User:
+            algorithm: bcrypt
     providers:
-        in_memory: { memory: ~ }
+        db_provider:
+            entity:
+                class: App\Entity\User
+                property: username
     firewalls:
         dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            pattern: ^/(_(profiler|wdt|error)|css|images|js)/
             security: false
-        main:
-            anonymous: ~
+        login:
+            pattern: ^/api/login
+            stateless: true
+            anonymous: true
+            provider: db_provider
+            json_login:
+                check_path:                 /api/login_check
+                success_handler:            lexik_jwt_authentication.handler.authentication_success
+                failure_handler:            lexik_jwt_authentication.handler.authentication_failure
+                require_previous_session:   false
 
+        api:
+            pattern:   ^/api/
+            stateless: true
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
+
+    access_control:
+        - { path: ^/api/login, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/profile, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/jobs, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/sensors, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/rooms, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/manual_behaviors, role: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/scheduled_behaviors, role: IS_AUTHENTICATED_FULLY }
+
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_USER, ROLE_ADMIN]
             # activate different ways to authenticate
 
             # http_basic: ~

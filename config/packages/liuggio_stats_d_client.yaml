@@ -1,0 +1,7 @@
+liuggio_stats_d_client:
+    connection:
+        class: Liuggio\StatsdClient\Sender\SocketSender
+        debug: false
+        host: telegraf
+        port: 8125
+        protocol: udp

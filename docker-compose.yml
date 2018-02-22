@@ -6,31 +6,54 @@ services:
         networks:
             - imperius
         volumes:
-            - .:/code
+            - imperius:/code
 
     web:
         container_name: web.imperius.home
         build: ./docker/nginx
-        restart: always
         networks:
             - imperius
         ports:
-            - 8888:8888
-            - 8081:80
+            - 8089:81
+            - 8080:8080
+            - 3000:3000
+            - 8083:8083
+            - 9005:9000
         volumes_from:
             - code
         depends_on:
-          - grafana
-          - influxdb
-          - php-fpm
+            - php-fpm-xdebug
+            - php-fpm
+            - influxdb
+            - grafana
+            - graylog
 
     php-fpm:
         container_name: php-fpm.imperius.home
         build: ./docker/php-fpm
+        entrypoint:
+            - "entrypoint.sh"
+            - "php-fpm"
         networks:
             - imperius
         volumes_from:
-            - code
+            - code:delegated
+
+    php-fpm-xdebug:
+        container_name: php-fpm-xdebug.imperius.home
+        build: ./docker/php-fpm
+        entrypoint:
+            - "entrypoint.sh"
+            - "php-fpm"
+            - "-F"
+            - "-c"
+            - "/xdebug.ini"
+        networks:
+            - imperius
+        volumes_from:
+            - code:delegated
+        expose:
+          - 9001
 
     mysql:
         container_name: mysql.imperius.home
@@ -38,9 +61,9 @@ services:
         networks:
             - imperius
         volumes:
-            - ../imperius-mysql:/var/lib/mysql
+            - imperius-mysql:/var/lib/mysql
         ports:
-            - 3306:3306
+            - 13333:3306
         environment:
             - MYSQL_DATABASE=imperius
             - MYSQL_USER=imperius-project
@@ -52,8 +75,18 @@ services:
         build: ./docker/redis
         networks:
             - imperius
-        ports:
-          - "6378:6379"
+
+
+    mysql-grafana:
+        container_name: mysql-grafana.imperius.home
+        build: ./docker/mysql-grafana
+        networks:
+            - imperius
+        environment:
+            - MYSQL_DATABASE=grafana
+            - MYSQL_USER=imperius-tools
+            - MYSQL_PASSWORD=0tMnbuaZULZx66J
+            - MYSQL_ROOT_PASSWORD=root
 
     influxdb:
         container_name: influxdb.imperius.home
@@ -62,18 +95,19 @@ services:
             - imperius
         ports:
             - 8086:8086
-            - 8083:8083
+            - 8084:8083
+            - 4444:4444
 
     grafana:
         container_name: grafana.imperius.home
         build: ./docker/grafana
         depends_on:
-            - mysql
+            - mysql-grafana
         restart: always
         networks:
             - imperius
         ports:
-            - 3000:3000
+            - 3002:3000
 
     telegraf:
         container_name: telegraf.imperius.home
@@ -81,8 +115,65 @@ services:
         depends_on:
             - grafana
         restart: always
+        ports:
+            - 8125:8125
         networks:
             - imperius
+
+    mongo:
+        container_name: mongo.imperius.home
+        build: ./docker/mongo
+        networks:
+            - imperius
+        volumes_from:
+            - code
+        volumes:
+            - mongo:/data/db
+
+    elasticsearch:
+        container_name: elasticsearch.imperius.home
+        build: ./docker/elasticsearch
+        command: "elasticsearch -Des.cluster.name='graylog'"
+        networks:
+            - imperius
+        volumes_from:
+            - code
+        volumes:
+            - elasticsearch:/usr/share/elasticsearch/data
+
+    graylog:
+        container_name: graylog.imperius.home
+        build: ./docker/graylog
+        environment:
+            GRAYLOG_PASSWORD_SECRET: somepasswordpepper
+            GRAYLOG_ROOT_PASSWORD_SHA2: a749771a53dab39ee7c44e12cb73899f63c7fce16f9babd3726aba0ab6143179
+            GRAYLOG_WEB_ENDPOINT_URI: http://127.0.0.1:9000/api
+        depends_on:
+            - mongo
+            - elasticsearch
+        networks:
+            - imperius
+        volumes_from:
+            - code
+        ports:
+            - 9004:9000
+        volumes:
+            - graylog-journal:/usr/share/graylog/data/journal
+            - graylog-config:/usr/share/graylog/data/config
+
+volumes:
+    imperius:
+        external: true
+    imperius-mysql:
+        external: false
+    mongo:
+        external: false
+    elasticsearch:
+        external: false
+    graylog-journal:
+        external: false
+    graylog-config:
+        external: false
 
 networks:
     imperius:

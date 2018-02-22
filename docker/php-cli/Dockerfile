@@ -29,7 +29,6 @@ RUN apk --update add \
         tar \
         git \
         zip \
-        php7-xdebug \
         php7-redis \
         php7-pcntl \
         php7-sockets \
@@ -37,18 +36,24 @@ RUN apk --update add \
         php7-pdo_mysql \
         php7-gmp \
         php7-imagick \
+        php7-xdebug \
         php7-simplexml \
         php7-tokenizer \
-        php7-xmlwriter
+        php7-xmlwriter \
+        php7-pear \
+        php7-dev \
+        gcc \
+        g++ \
+        make \
+        mosquitto-dev
+
+RUN pecl install Mosquitto-alpha \
+    && echo "extension=mosquitto.so" > /etc/php7/php.ini
 
 # Memory Limit
 RUN echo "memory_limit=-1" > /etc/php7/conf.d/memory-limit.ini
 
-RUN echo "xdebug.remote_port=9001" >> /etc/php7/conf.d/xdebug.ini \
-    && echo "xdebug.remote_enable=1" >> /etc/php7/conf.d/xdebug.ini \
-    && echo "xdebug.remote_autostart=1" >> /etc/php7/conf.d/xdebug.ini \
-    && echo "xdebug.remote_connect_back=0" >> /etc/php7/conf.d/xdebug.ini \
-    && echo "xdebug.remote_host=192.168.65.1" >> /etc/php7/conf.d/xdebug.ini
+RUN rm /etc/php7/conf.d/xdebug.ini
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php \
@@ -56,3 +61,5 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer
 
 WORKDIR /code
+
+ENTRYPOINT ["php", "bin/console"]

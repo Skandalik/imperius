@@ -1,2 +1,2 @@
 #!/bin/bash
-bin/container php-cli bin/console $@
+docker-compose -f docker-compose.yml -f docker-compose.cli.yml run --rm php-cli $@
