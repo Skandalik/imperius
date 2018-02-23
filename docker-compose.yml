@@ -14,7 +14,6 @@ services:
         networks:
             - imperius
         ports:
-            - 8089:81
             - 8080:8080
             - 3000:3000
             - 8083:8083
@@ -22,7 +21,6 @@ services:
         volumes_from:
             - code
         depends_on:
-            - php-fpm-xdebug
             - php-fpm
             - influxdb
             - grafana
