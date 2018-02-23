@@ -39,22 +39,6 @@ services:
         volumes_from:
             - code:delegated
 
-    php-fpm-xdebug:
-        container_name: php-fpm-xdebug.imperius.home
-        build: ./docker/php-fpm
-        entrypoint:
-            - "entrypoint.sh"
-            - "php-fpm"
-            - "-F"
-            - "-c"
-            - "/xdebug.ini"
-        networks:
-            - imperius
-        volumes_from:
-            - code:delegated
-        expose:
-          - 9001
-
     mysql:
         container_name: mysql.imperius.home
         build: ./docker/mysql
@@ -163,7 +147,7 @@ services:
 
 volumes:
     imperius:
-        external: true
+        external: false
     imperius-mysql:
         external: false
     mongo:
