@@ -15,7 +15,7 @@ services:
             - imperius
         ports:
             - 8080:8080
-            - 3000:3000
+            - 3002:3000
             - 8083:8083
             - 9005:9000
         volumes_from:
@@ -49,8 +49,8 @@ services:
         environment:
             - MYSQL_DATABASE=imperius
             - MYSQL_USER=imperius-project
-            - MYSQL_PASSWORD=imperius-project-pass
-            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_PASSWORD=5vx12R1hhcGX16e
+            - MYSQL_ROOT_PASSWORD=u5f3zSrghY1bNlA
 
     redis:
         container_name: redis.imperius.home
@@ -68,7 +68,7 @@ services:
             - MYSQL_DATABASE=grafana
             - MYSQL_USER=imperius-tools
             - MYSQL_PASSWORD=0tMnbuaZULZx66J
-            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_ROOT_PASSWORD=8r2M1MTGqGooQZw
 
     influxdb:
         container_name: influxdb.imperius.home
@@ -89,7 +89,7 @@ services:
         networks:
             - imperius
         ports:
-            - 3002:3000
+            - 3000:3000
 
     telegraf:
         container_name: telegraf.imperius.home
@@ -129,7 +129,7 @@ services:
         environment:
             GRAYLOG_PASSWORD_SECRET: somepasswordpepper
             GRAYLOG_ROOT_PASSWORD_SHA2: a749771a53dab39ee7c44e12cb73899f63c7fce16f9babd3726aba0ab6143179
-            GRAYLOG_WEB_ENDPOINT_URI: http://127.0.0.1:9005/api
+            GRAYLOG_WEB_ENDPOINT_URI: http://127.0.0.1:9000/api
         depends_on:
             - mongo
             - elasticsearch
