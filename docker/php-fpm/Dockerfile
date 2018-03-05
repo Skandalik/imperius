@@ -6,7 +6,7 @@ COPY ./sources/sources.list /etc/apt/sources.list
 
 RUN apt-get update -qq && \
     apt-get install -y python && \
-    apt-get install -y python3.6 && \
+    apt-get install -y python3 && \
     apt-get install -y \
         ca-certificates \
         openssl \
