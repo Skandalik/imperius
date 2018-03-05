@@ -8,8 +8,6 @@ RUN apt-get update -qq && \
     apt-get install -y python && \
     apt-get install -y python3.6 && \
     apt-get install -y \
-        binutils \
-        libc6-dev \
         ca-certificates \
         openssl \
         tar \
@@ -17,9 +15,8 @@ RUN apt-get update -qq && \
         bash \
         g++ \
         make \
-        musl-dev \
-        libmosquitto-dev \
-        libmagickwand-dev --no-install-recommends && rm -rf /var/lib/apt/lists/*
+        musl-dev
+RUN apt-get install -y libmosquitto-dev && rm -rf /var/lib/apt/lists/*
 
 RUN pecl install imagick && docker-php-ext-enable imagick
 
