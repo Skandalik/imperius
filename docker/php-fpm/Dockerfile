@@ -8,6 +8,8 @@ RUN apt-get update -qq && \
     apt-get install -y python && \
     apt-get install -y python3.6 && \
     apt-get install -y \
+        binutils \
+        libc6-dev \
         ca-certificates \
         openssl \
         tar \
